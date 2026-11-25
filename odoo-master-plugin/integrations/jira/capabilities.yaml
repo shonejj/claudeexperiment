@@ -1,0 +1,21 @@
+provider: jira
+description: Jira Cloud/Data Center via Atlassian's remote MCP server or community servers (e.g. mcp-atlassian).
+server_patterns: ['atlassian', 'jira']
+# regexes are matched against the normalised tool name (snake_case, lowercase)
+tools:
+  - {match: '(search.*jira.*jql|jira_search|search_issues|search_jira)', capabilities: [ticket.search]}
+  - {match: '(get_jira_issue$|jira_get_issue$|get_issue$)', capabilities: [ticket.read, ticket.read_comments]}
+  - {match: '(add_comment_to_jira_issue|jira_add_comment|add_comment)', capabilities: [ticket.add_comment]}
+  - {match: '(get_transitions|jira_get_transitions)', capabilities: [ticket.list_transitions]}
+  - {match: '(transition_jira_issue|jira_transition_issue|transition_issue)', capabilities: [ticket.transition]}
+  - {match: '(create_jira_issue|jira_create_issue)', capabilities: [ticket.create]}
+  - {match: '(edit_jira_issue|jira_update_issue|update_issue)', capabilities: [ticket.update, ticket.assign]}
+  - {match: '(remote_link|jira_create_issue_link|link)', capabilities: [ticket.link]}
+  - {match: '(attachment|jira_upload)', capabilities: [ticket.attach]}
+  - {match: '(confluence.*search|search.*confluence)', capabilities: [docs.search]}
+  - {match: '(get_confluence_page|confluence_get_page)', capabilities: [docs.read]}
+  - {match: '(create_confluence_page|update_confluence_page|confluence_(create|update)_page)', capabilities: [docs.write]}
+event_mechanisms:
+  - Jira Cloud webhooks (Settings > System > WebHooks or Automation "Send web request") -> odoo-master events serve /events/jira
+  - Jira Automation rule on label/status/assignee -> web request with a shared secret header
+  - polling: scheduled `claude -p` run of the jira-ticket-planning workflow with a JQL filter

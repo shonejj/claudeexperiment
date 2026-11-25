@@ -1,0 +1,12 @@
+provider: linear
+description: Linear via its MCP server.
+server_patterns: ['linear']
+tools:
+  - {match: '(list_issues|search_issues)', capabilities: [ticket.search]}
+  - {match: 'get_issue', capabilities: [ticket.read, ticket.read_comments]}
+  - {match: 'create_issue$', capabilities: [ticket.create]}
+  - {match: 'update_issue', capabilities: [ticket.update, ticket.transition, ticket.assign]}
+  - {match: '(create_comment|add_comment)', capabilities: [ticket.add_comment]}
+  - {match: 'list_comments', capabilities: [ticket.read_comments]}
+event_mechanisms:
+  - Linear webhooks (Issue create/update, label changes) with signing secret -> /events/linear (HMAC sha256 header Linear-Signature)

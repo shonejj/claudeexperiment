@@ -153,9 +153,16 @@ def cmd_classify(a):
 
 
 def cmd_estimate(a):
-    from .planning.estimate import estimate
+    from .planning.estimate import estimate, to_markdown
     data = json.loads(Path(a.input).read_text()) if a.input else json.loads(sys.stdin.read())
-    emit(estimate(data, _root(a)))
+    est = estimate(data, _root(a))
+    if a.out:
+        out = Path(a.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.with_suffix(".json").write_text(json.dumps(est, indent=2))
+        out.with_suffix(".md").write_text(to_markdown(est))
+        est["written"] = [str(out.with_suffix(".json")), str(out.with_suffix(".md"))]
+    emit(est)
     return 0
 
 
@@ -303,7 +310,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--allow-production-readonly", action="store_true"); s.set_defaults(fn=cmd_db)
 
     s = sub.add_parser("classify"); s.add_argument("request"); s.set_defaults(fn=cmd_classify)
-    s = sub.add_parser("estimate"); s.add_argument("--input"); s.set_defaults(fn=cmd_estimate)
+    s = sub.add_parser("estimate"); s.add_argument("--input"); s.add_argument("--out", help="write <out>.json and <out>.md")
+    s.set_defaults(fn=cmd_estimate)
 
     s = sub.add_parser("workflow")
     s.add_argument("action", choices=["list", "validate", "start", "next", "complete", "approve", "status", "cancel", "set", "executions"])

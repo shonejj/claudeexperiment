@@ -156,6 +156,9 @@ def _decide(signals: list[dict], lower, upper) -> dict:
     confidence = "none"
     if score:
         version, best = score.most_common(1)[0]
+        rel = [s for s in signals if s["source"] == "release_py"]
+        if rel:  # the Odoo source itself is authoritative; other signals only produce conflicts
+            version, best = rel[0]["version"], max(best, 100)
         if not _in_bounds(version, lower, upper) and best < 100:
             conflicts.append({"type": "syntax_contradicts_declared_version", "version": version,
                               "bounds": [lower, upper]})

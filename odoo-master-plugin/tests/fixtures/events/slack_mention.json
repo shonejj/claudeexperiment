@@ -1,0 +1,1 @@
+{"type": "event_callback", "event_id": "Ev0001", "event": {"type": "app_mention", "channel": "C123", "user": "U1", "ts": "1764100000.000100", "text": "<@UBOT> Odoo: validating receipt WH/IN/0042 raises 'Complete the quality checks first' although all checks passed"}}

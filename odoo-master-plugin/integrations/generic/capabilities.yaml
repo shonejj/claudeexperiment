@@ -1,0 +1,35 @@
+provider: generic
+description: Fallback profiles for other MCP servers. Add your own provider file under .odoo-master/integrations/<name>.yaml (same format) to map a custom/internal server.
+profiles:
+  - provider: notion
+    server_patterns: ['notion']
+    tools:
+      - {match: 'search', capabilities: [docs.search]}
+      - {match: '(retrieve|get|read|fetch)', capabilities: [docs.read]}
+      - {match: '(create|update|append)', capabilities: [docs.write]}
+  - provider: confluence
+    server_patterns: ['confluence']
+    tools:
+      - {match: 'search', capabilities: [docs.search]}
+      - {match: '(get|read)_?page', capabilities: [docs.read]}
+      - {match: '(create|update)_?page', capabilities: [docs.write]}
+  - provider: postgres
+    server_patterns: ['postgres', 'pg', 'database', 'sql']
+    tools:
+      - {match: '(query|execute|sql)', capabilities: [db.query]}
+      - {match: '(schema|list_tables|describe)', capabilities: [db.schema]}
+  - provider: playwright
+    server_patterns: ['playwright', 'browser', 'puppeteer']
+    tools:
+      - {match: '(navigate|snapshot)', capabilities: [browser.navigate]}
+      - {match: '(click|type|fill|select|press|drag)', capabilities: [browser.interact]}
+      - {match: 'screenshot', capabilities: [browser.screenshot]}
+  - provider: google-drive
+    server_patterns: ['gdrive', 'google.?drive', 'drive']
+    tools:
+      - {match: 'search', capabilities: [docs.search]}
+      - {match: '(read|get|fetch|export)', capabilities: [docs.read]}
+  - provider: odoo-master
+    server_patterns: ['odoo-master', 'odoo_master']
+    tools:
+      - {match: '.*', capabilities: [odoo.analyze]}

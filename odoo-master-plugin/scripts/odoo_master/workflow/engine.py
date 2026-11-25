@@ -193,7 +193,9 @@ def next_steps(eid: str, root: Path | None = None) -> dict:
             if st["status"] != "PENDING":
                 continue
             needs = sd.get("needs", []) or []
-            if any(ex["steps"][n]["status"] in TERMINAL_FAIL for n in needs) and sd.get("type") != "notify":
+            upstream_failed = any(ex["steps"][n]["status"] in TERMINAL_FAIL or
+                                  (ex["steps"][n]["status"] == "SKIPPED" and ex["steps"][n].get("reason") == "upstream failed") for n in needs)
+            if upstream_failed:
                 st["status"] = "SKIPPED"
                 st["reason"] = "upstream failed"
                 changed = True

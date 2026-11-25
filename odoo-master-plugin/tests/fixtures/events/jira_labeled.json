@@ -1,0 +1,4 @@
+{"webhookEvent": "jira:issue_updated", "timestamp": 1764100000000,
+ "user": {"displayName": "Dana Planner"},
+ "issue": {"id": "10042", "key": "INV-42", "fields": {"summary": "Receipts can be validated without quality checks", "labels": ["inventory", "odoo-master"], "status": {"name": "To Do"}, "assignee": null}},
+ "changelog": {"items": [{"field": "labels", "fromString": "inventory", "toString": "inventory odoo-master"}]}}

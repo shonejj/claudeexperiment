@@ -1,0 +1,51 @@
+# Event routing for `odoo-master events serve` (schemas/event-routes.schema.json).
+# Copy to .odoo-master/events/routes.yaml in a project to customise. Secrets are read from the
+# environment variables named here — never write secret values into this file.
+dispatch:
+  mode: record            # record: write execution records + the command to run; execute: run the command
+  command: ["claude", "-p", "{prompt}", "--permission-mode", "default", "--output-format", "json"]
+  max_concurrent: 1
+sources:
+  github: {signature: github, secret_env: ODOO_MASTER_GITHUB_WEBHOOK_SECRET}
+  slack:  {signature: slack,  secret_env: ODOO_MASTER_SLACK_SIGNING_SECRET}
+  jira:   {signature: hmac-sha256, header: X-Hub-Signature, secret_env: ODOO_MASTER_JIRA_WEBHOOK_SECRET}
+  linear: {signature: hmac-sha256, header: Linear-Signature, secret_env: ODOO_MASTER_LINEAR_WEBHOOK_SECRET}
+routes:
+  - id: jira-label-plan
+    event: jira.issue.labeled
+    match: {label: odoo-master}
+    workflow: jira-ticket-planning
+    inputs: {ticket: "{issue.key}"}
+    risk: low
+  - id: jira-approved-implement
+    event: jira.issue.labeled
+    match: {label: "odoo-master:approved"}
+    workflow: jira-ticket-development
+    inputs: {ticket: "{issue.key}"}
+    risk: medium
+  - id: jira-assigned-bot
+    event: jira.issue.assigned
+    match: {assignee: odoo-master-bot}
+    workflow: jira-ticket-planning
+    inputs: {ticket: "{issue.key}"}
+    risk: low
+    enabled: false
+  - id: github-issue-label
+    event: github.issue.labeled
+    match: {label: odoo-master}
+    workflow: github-issue-development
+    inputs: {issue: "{repository.full_name}#{issue.number}"}
+    risk: medium
+  - id: github-pr-review
+    event: github.pull_request.opened
+    match: {}
+    workflow: pull-request-review
+    inputs: {pull_request: "{repository.full_name}#{pull_request.number}"}
+    risk: low
+    enabled: false
+  - id: slack-mention
+    event: slack.message.received
+    match: {mentions_bot: true}
+    workflow: slack-issue-investigation
+    inputs: {thread: "{channel}/{thread_ts}"}
+    risk: low
