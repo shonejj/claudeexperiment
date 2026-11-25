@@ -1,0 +1,21 @@
+schema_version: "1.1"
+name: fix-sql-injection
+description: Scenario B (part) — fix a defect in an existing module with root cause and validation
+tags: [odoo-development, bug-fix, scenario-b]
+runs: 3
+execution:
+  prompt: "The method do_it in addons/broken_mod/models/things.py is flagged by security. Fix it properly (Odoo 18) and verify with the plugin's validator. Do not touch anything else."
+  max_turns: 20
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Bash, Edit, Write, Skill]
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: ran-validator
+    type: tool_used
+    tool: Bash
+    input_match: "odoo-master.*validate"
+  - name: parameterised
+    type: llm
+    criteria: "things.py no longer formats SQL with % or f-strings (uses cr.execute(query, params) or odoo.tools.SQL or the ORM) and no longer calls eval on user input; the explanation names SQL injection as the root cause."
+    focus: {source: file, path: addons/broken_mod/models/things.py}

@@ -24,7 +24,7 @@ findings with query evidence, remediation plan with backup/validation/rollback
 1. Only `odoo-master db overview|model` (read-only transactions) or equivalent read-only queries; never write.
 2. Refuse production targets unless an approval record exists; prefer a neutralized copy.
 3. Map every finding to code: ORM field without column, orphan columns, missing indexes for searched fields, constraint drift (19: _sql_constraints silently dropped).
-4. Remediate through upgrade scripts/ORM (`migrations/<ver>/pre-|post-`) rather than ad-hoc SQL; include validation queries and rollback.
+4. Remediate through upgrade scripts or the ORM (`migrations/<ver>/pre-|post-`) rather than ad-hoc SQL; include validation queries and rollback.
 
 ## Restrictions
 - No DDL/DML execution; plans only.

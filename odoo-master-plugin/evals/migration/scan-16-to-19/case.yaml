@@ -1,0 +1,23 @@
+schema_version: "1.1"
+name: scan-16-to-19
+description: Scenario E (planning part) — migration analysis 16.0 -> 19.0 with breaking changes per hop
+tags: [migration, scenario-e]
+runs: 3
+execution:
+  prompt: "We need to migrate sale_discount_approval from Odoo 16 to Odoo 19. Produce the migration analysis: breaking changes per version hop with file locations, database implications and risks. Do not change code yet."
+  max_turns: 20
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Bash, Skill, Write]
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: used-migration-scan
+    type: tool_used
+    tool: Bash
+    input_match: "odoo-master.*migration"
+  - name: mentions-sql-constraints
+    type: regex
+    pattern: "_sql_constraints"
+  - name: completeness
+    type: llm
+    criteria: "The analysis is organised by hop (17.0, 18.0, 19.0) and covers: attrs/states removal (17), post_init_hook signature (17), name_get deprecation, tree->list (18), group_operator->aggregator (18), _sql_constraints ignored in 19 needing models.Constraint (with the data risk that the unique rule silently disappears), groups_id->group_ids (19), odoo.osv deprecation (19); it mentions upgrade scripts/backup/rollback and does not modify code."

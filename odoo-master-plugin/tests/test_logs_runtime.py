@@ -24,3 +24,10 @@ def test_runtime_skips_without_docker(monkeypatch, tmp_path):
     monkeypatch.setattr(runtime, "available", lambda: {"available": False, "reason": "docker CLI not installed"})
     r = runtime.test([str(tmp_path)], ["x"], "18.0", project_root=tmp_path)
     assert r["status"] == "skipped" and r["level"] == "runtime"
+
+
+def test_per_module_test_counts():
+    log = ("2026-11-25 22:00:09,668 1 INFO db odoo.tests.stats: web: 6 tests 0.02s 15 queries\n"
+           "2026-11-25 22:00:09,668 1 INFO db odoo.tests.result: 0 failed, 0 error(s) of 2 tests when loading database 'db'\n")
+    s = summarize(log)
+    assert s["tests"]["per_module"] == {"web": 6} and s["tests"]["ran"] == 2

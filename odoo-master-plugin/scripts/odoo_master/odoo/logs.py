@@ -14,6 +14,7 @@ LINE = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+) (\d+) (DEBUG|INFO
 TESTS_RAN = re.compile(r"(\d+) failed, (\d+) error\(s\) of (\d+) tests")
 TESTS_OK = re.compile(r"Ran (\d+) tests? in")
 TESTS_STATS = re.compile(r"(\d+) post-tests? in|(\d+) tests? +[\d.]+s")
+MODULE_STATS = re.compile(r"^([\w]+): (\d+) tests? ")
 PG_ERR = re.compile(r"psycopg2?\.(errors\.)?\w+|ERROR:\s+(duplicate key|null value|column .* does not exist|relation .* does not exist|syntax error)")
 
 
@@ -21,7 +22,7 @@ def summarize(text: str, max_items: int = 30) -> dict:
     levels: Counter = Counter()
     errors, warnings, tracebacks, pg_errors = [], [], [], []
     loggers: Counter = Counter()
-    tests = {"ran": None, "failed": None, "errors": None, "lines": []}
+    tests = {"ran": None, "failed": None, "errors": None, "lines": [], "per_module": {}}
     tb: list[str] | None = None
     for raw in text.splitlines():
         m = LINE.match(raw)
@@ -37,6 +38,10 @@ def summarize(text: str, max_items: int = 30) -> dict:
                     errors.append({"logger": logger, "message": msg[:400]})
             elif level == "WARNING" and len(warnings) < max_items:
                 warnings.append({"logger": logger, "message": msg[:300]})
+            if logger == "odoo.tests.stats":
+                ms = MODULE_STATS.match(msg)
+                if ms:
+                    tests["per_module"][ms.group(1)] = max(tests["per_module"].get(ms.group(1), 0), int(ms.group(2)))
             if logger.startswith("odoo.tests"):
                 r = TESTS_RAN.search(msg)
                 if r:

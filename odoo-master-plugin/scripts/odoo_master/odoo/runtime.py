@@ -108,7 +108,11 @@ def test(addons: list[str], modules: list[str], series: str, image: str | None =
             ran = summ["tests"].get("ran")
             failed = (summ["tests"].get("failed") or 0) + (summ["tests"].get("errors") or 0)
             status = "passed" if r.returncode == 0 and summ["clean"] and failed == 0 else "failed"
-            if status == "passed" and not ran:
+            # Odoo may run tests of other modules (e.g. web JS suites on 20.0) even with --test-tags /<module>:
+            # only tests of the target modules count towards "passed".
+            own = {m: summ["tests"]["per_module"].get(m, 0) for m in modules}
+            summ["tests"]["target_modules"] = own
+            if status == "passed" and (not ran or not any(own.values())):
                 status = "passed_no_tests"
             record["passes"].append({"pass": label, "exit_code": r.returncode, "seconds": round(time.time() - t0, 1),
                                      "status": status, "log": str(log_path), "summary": summ})

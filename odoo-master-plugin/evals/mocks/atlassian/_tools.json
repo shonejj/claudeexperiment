@@ -1,0 +1,5 @@
+{"tools": [
+  {"name": "searchJiraIssuesUsingJql", "description": "Search Jira issues with JQL", "inputSchema": {"type": "object", "properties": {"jql": {"type": "string"}}, "required": ["jql"]}, "annotations": {"readOnlyHint": true}},
+  {"name": "getJiraIssue", "description": "Get a Jira issue by key", "inputSchema": {"type": "object", "properties": {"issueIdOrKey": {"type": "string"}}, "required": ["issueIdOrKey"]}, "annotations": {"readOnlyHint": true}},
+  {"name": "addCommentToJiraIssue", "description": "Add a comment to a Jira issue", "inputSchema": {"type": "object", "properties": {"issueIdOrKey": {"type": "string"}, "commentBody": {"type": "string"}}, "required": ["issueIdOrKey", "commentBody"]}}
+]}

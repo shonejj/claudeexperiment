@@ -47,10 +47,13 @@ MODEL_QUERIES = {
 }
 
 ACL_QUERIES = {
-    "models_without_acl_legacy": ("SELECT m.model FROM ir_model m WHERE m.transient = false AND NOT EXISTS "
+    # only models backed by a table (abstract mixins have none)
+    "models_without_acl_legacy": ("SELECT m.model FROM ir_model m WHERE EXISTS (SELECT 1 FROM information_schema.tables t "
+                                  "WHERE t.table_schema='public' AND t.table_name=replace(m.model,'.','_')) AND NOT EXISTS "
                                   "(SELECT 1 FROM ir_model_access a WHERE a.model_id=m.id) ORDER BY 1 LIMIT 200"),
-    "models_without_acl_20": ("SELECT m.model FROM ir_model m WHERE NOT EXISTS (SELECT 1 FROM ir_access a WHERE a.model_id=m.id) "
-                              "ORDER BY 1 LIMIT 200"),
+    "models_without_acl_20": ("SELECT m.model FROM ir_model m WHERE EXISTS (SELECT 1 FROM information_schema.tables t "
+                              "WHERE t.table_schema='public' AND t.table_name=replace(m.model,'.','_')) AND NOT EXISTS "
+                              "(SELECT 1 FROM ir_access a WHERE a.model_id=m.id) ORDER BY 1 LIMIT 200"),
 }
 
 _IDENT = re.compile(r"^[a-z_][a-z0-9_.]*$")

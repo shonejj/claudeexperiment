@@ -46,10 +46,13 @@ def _taxonomy() -> dict:
     return load_yaml(PLUGIN_ROOT / "integrations" / "mcp" / "capability-taxonomy.yaml")
 
 
-def provider_for(server: str, tools: list[dict], profiles: list[dict]) -> str | None:
-    for prof in profiles:
-        if any(re.search(pat, server or "", re.I) for pat in prof.get("server_patterns", [])):
-            return prof["provider"]
+def provider_for(server: str, tools: list[dict], profiles: list[dict], server_info_name: str | None = None) -> str | None:
+    """Provider from the configured server name, then the server's self-reported serverInfo.name,
+    then tool-name patterns (>= 3 matching tools)."""
+    for name in (server, server_info_name):
+        for prof in profiles:
+            if name and any(re.search(pat, name, re.I) for pat in prof.get("server_patterns", [])):
+                return prof["provider"]
     names = " ".join(_norm(t.get("name", "")) for t in tools)
     for prof in profiles:
         hits = sum(1 for rule in prof.get("tools", []) if re.search(rule["match"], names))
@@ -154,7 +157,7 @@ def _save(reg: dict, root) -> dict:
 
 
 def _store_server(reg, name, tools, status, source, profiles, tax, extra=None):
-    provider = provider_for(name, tools, profiles)
+    provider = provider_for(name, tools, profiles, ((extra or {}).get("server_info") or {}).get("name"))
     entry = {"provider": provider, "status": status, "source": source, "updated_at": now_iso(),
              "tools": [dict(classify_tool(t, provider, profiles, tax), qualified_name=f"mcp__{name}__{t.get('name')}") for t in tools]}
     if extra:

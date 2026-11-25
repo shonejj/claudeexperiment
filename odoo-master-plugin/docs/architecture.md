@@ -59,9 +59,9 @@ flowchart TB
 | Database intelligence | `odoo/db.py` (read-only psql), `odoo-database-engineer`, `database-reviewer` | a Postgres MCP server (capability `db.query`) |
 | Migration intelligence | `odoo/migration.py`, rules, `odoo-migration-specialist` | rule table |
 | Documentation, reporting & evidence | `reporting/render.py`, `reporting/evidence.py`, `templates/` | templates, PDF engine order |
-| Security & guardrails | `policies/*.yaml`, `hooks/guard.py`, `stop_gate.py`, native permissions | managed settings (organisation boundary) |
+| Security & guardrails | `policies/*.yaml`, `scripts/odoo_master/hooks/guard.py`, `scripts/odoo_master/hooks/stop_gate.py`, native permissions | managed settings (organisation boundary) |
 | Configuration & policy | `config/defaults.yaml` → org file → `.odoo-master/config.yaml` → plugin options → env | every level |
-| Platform integration (SaaS/PaaS) | `integrations/events.py` (authenticated intake, dedupe, execution records), `runtime/` adapters | a hosted receiver that implements the same record format |
+| Platform integration (SaaS/PaaS) | `scripts/odoo_master/integrations/events.py` (authenticated intake, dedupe, execution records), `runtime/` adapters | a hosted receiver that implements the same record format |
 
 ## Request lifecycle (interactive)
 
