@@ -1,0 +1,62 @@
+schema_version: 1
+name: jira-ticket-development
+version: 1.0.0
+description: Implement an approved ticket end-to-end - branch, code, tests, review, evidence, PR, ticket update - keeping the ticket id on every artifact.
+classification: [ticket_implementation]
+triggers: [interactive, jira.issue.status_changed, jira.issue.labeled]
+inputs:
+  ticket: {required: true}
+  plan_execution: {description: "execution id of the planning run, if any"}
+defaults: {timeout_minutes: 120, retries: 1}
+deliverables: [branch, code + tests, evidence manifest, development report, pull request, ticket completion comment]
+steps:
+  - id: confirm-approval
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.read
+    instructions: Verify the configured approval signal on the ticket (policies/approvals.yaml ticket_approval) and that the ticket is the one planned. Output approval_evidence (who/when/URL).
+    outputs: [approval_evidence, risk]
+  - id: approval
+    type: approval
+    needs: [confirm-approval]
+    instructions: Record the ticket approval as --by "<approver> via <ticket URL>". High-risk tickets always need a human.
+  - id: branch
+    needs: [approval]
+    agent: github-agent
+    skills: [github-management]
+    instructions: Create branch odoo-master/<ticket-key>-<slug> from the default branch; never reuse an unrelated branch.
+    outputs: [branch]
+  - id: implement
+    needs: [branch]
+    agent: odoo-developer
+    skills: [implementation, odoo-module-development]
+    outputs: [changed_files]
+  - id: verify
+    needs: [implement]
+    agent: qa-engineer
+    skills: [odoo-testing, evidence-generation]
+    evidence: [validation, runtime-test]
+    on_failure: {retry_from: implement, max_loops: 3}
+  - id: review
+    needs: [verify]
+    agent: code-reviewer
+    skills: [code-review]
+    on_failure: {retry_from: implement, max_loops: 2}
+  - id: report
+    needs: [review]
+    agent: documentation-writer
+    skills: [documentation, evidence-generation]
+  - id: pull-request
+    type: notify
+    needs: [report]
+    agent: github-agent
+    skills: [github-management]
+    capability: repo.create_pull_request
+    instructions: Push the branch (no force) and open a PR referencing the ticket key; only when repository write access is authorised.
+  - id: ticket-complete
+    type: notify
+    needs: [pull-request]
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.add_comment
+    instructions: Completion comment from templates/jira-comments/completion-comment.md (files, branch, PR, tests, evidence, migration notes, open issues). Transition status only if configured and acceptance criteria are met.

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "odoo-master/execution.schema.json",
+  "title": "Workflow execution record (checkpoint)",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "workflow",
+    "status",
+    "steps",
+    "inputs",
+    "context",
+    "approvals",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string"
+    },
+    "workflow": {
+      "type": "string"
+    },
+    "workflow_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "workflow_source": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "running",
+        "waiting_approval",
+        "blocked",
+        "completed",
+        "failed",
+        "rejected",
+        "cancelled",
+        "stalled"
+      ]
+    },
+    "autonomy": {
+      "enum": [
+        "checkpoint",
+        "autonomous"
+      ]
+    },
+    "ticket": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_event": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "context": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "steps": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "status",
+          "attempts"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "PENDING",
+              "READY",
+              "RUNNING",
+              "DONE",
+              "DONE_WITH_CONCERNS",
+              "NEEDS_CONTEXT",
+              "BLOCKED",
+              "FAILED",
+              "SKIPPED",
+              "WAITING_APPROVAL",
+              "APPROVED",
+              "REJECTED",
+              "TIMED_OUT",
+              "CANCELLED"
+            ]
+          },
+          "attempts": {
+            "type": "integer"
+          },
+          "loops": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "step",
+          "decision",
+          "by",
+          "at"
+        ],
+        "properties": {
+          "decision": {
+            "enum": [
+              "approved",
+              "rejected"
+            ]
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array"
+    }
+  }
+}

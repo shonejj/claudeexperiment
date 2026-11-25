@@ -1,0 +1,11 @@
+required_for_completion:
+  - validation report (static)
+  - test results with counts (runtime when available)
+  - review verdicts (code-reviewer; security-specialist for security-relevant changes)
+  - changed files list and git branch/commit
+store: .odoo-master/evidence/<execution>/
+hash: sha256
+level_names: [static, unit, integration, runtime, database, browser, production]
+honesty_rules:
+  - never claim a level that was not executed
+  - list levels_missing explicitly in every final report

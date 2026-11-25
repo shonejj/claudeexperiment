@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "odoo-master/estimate.schema.json",
+  "title": "Effort estimate input",
+  "type": "object",
+  "required": [
+    "tasks"
+  ],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "ticket": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "complexity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "model",
+              "view",
+              "security",
+              "controller",
+              "owl",
+              "report",
+              "data",
+              "migration",
+              "integration",
+              "test",
+              "devops",
+              "analysis",
+              "docs",
+              "review"
+            ]
+          },
+          "complexity": {
+            "enum": [
+              "trivial",
+              "simple",
+              "moderate",
+              "complex",
+              "very_complex"
+            ]
+          },
+          "unknowns": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "new_module": {
+            "type": "boolean"
+          },
+          "touches_standard_flow": {
+            "type": "boolean"
+          },
+          "data_migration": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

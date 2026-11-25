@@ -1,0 +1,45 @@
+schema_version: 1
+name: slack-issue-investigation
+version: 1.0.0
+description: Turn an Odoo issue reported in a chat thread into a deduplicated ticket and a root-cause summary posted back to the same thread.
+classification: [slack_report]
+triggers: [interactive, slack.message.received]
+inputs:
+  thread: {required: true, description: Slack permalink or channel+ts}
+steps:
+  - id: read-thread
+    agent: integration-engineer
+    skills: [slack-triage, mcp-integration]
+    capability: chat.read_thread
+    instructions: Read the message and thread; extract symptom, module, user impact, error text; note channel visibility (public/private).
+    outputs: [issue, visibility, risk]
+  - id: dedupe
+    needs: [read-thread]
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.search
+    instructions: Search open tickets for the same symptom/module; output existing_ticket or none.
+    outputs: [existing_ticket]
+  - id: investigate
+    needs: [dedupe]
+    agent: odoo-python-specialist
+    skills: [debugging, odoo-project-analysis]
+    outputs: [root_cause]
+  - id: ticket-approval
+    type: approval
+    needs: [investigate]
+    instructions: Creating/updating a ticket and posting in a channel are external writes.
+  - id: ticket
+    type: notify
+    needs: [ticket-approval]
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.create
+    instructions: Create a ticket (or comment on existing_ticket) with the investigation; link the thread.
+  - id: reply
+    type: notify
+    needs: [ticket]
+    agent: integration-engineer
+    skills: [slack-triage]
+    capability: chat.reply_thread
+    instructions: Reply in the ORIGINAL thread only. Public channel -> summary + ticket link, no private ticket data.

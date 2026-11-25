@@ -1,0 +1,66 @@
+schema_version: 1
+name: odoo-migration
+version: 1.0.0
+description: Port custom modules between Odoo major versions, one hop at a time, with database migration scripts, validation and rollback plan.
+classification: [migration]
+triggers: [interactive, odoo.migration.requested]
+inputs:
+  source: {required: true, description: source series e.g. 16.0}
+  target: {required: true, description: target series e.g. 18.0}
+  modules: {description: comma-separated modules (default all custom)}
+  ticket: {}
+defaults: {timeout_minutes: 240, retries: 1}
+deliverables: [migration scan, migration plan + risk assessment (md+pdf), ported code per hop, upgrade scripts, test evidence, rollback plan]
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake, odoo-version-detection]
+  - id: scan
+    needs: [intake]
+    agent: odoo-migration-specialist
+    skills: [odoo-migration]
+    instructions: odoo-master migration plan --from <source> --to <target>; dependency order from module-dependency-map.json; Enterprise deps; stored-field changes.
+    outputs: [hops, blockers, plan_path, risk]
+  - id: db-impact
+    needs: [scan]
+    agent: odoo-database-engineer
+    skills: [odoo-database-analysis]
+    instructions: Database impact - renamed/removed stored fields, constraints dropped in 19 (_sql_constraints), ACL format in 20; validation queries; backup/restore procedure. Read-only DB inspection only when a non-production database is authorised.
+    outputs: [validation_queries]
+  - id: plan-approval
+    type: approval
+    needs: [db-impact]
+    always_human: true
+    present: [plan_path, blockers, risk, validation_queries]
+  - id: port
+    needs: [plan-approval]
+    agent: odoo-migration-specialist
+    skills: [odoo-migration, implementation]
+    instructions: Per hop - branch migrate/<hop>, upgrade_code --dry-run then apply, fix remaining findings, bump versions, write migrations/<ver>/ scripts.
+    timeout_minutes: 480
+  - id: validate
+    needs: [port]
+    agent: qa-engineer
+    skills: [odoo-testing]
+    instructions: odoo-master migration scan shows 0 blockers; odoo-master validate --series <target> passes.
+    evidence: [migration-check, validation]
+    on_failure: {retry_from: port, max_loops: 3}
+  - id: runtime
+    needs: [validate]
+    agent: test-automation-engineer
+    skills: [odoo-testing]
+    instructions: odoo-master runtime test --series <target>. Upgrade test on a neutralized copy only if one is provided and authorised.
+    evidence: [runtime-test]
+    on_failure: {retry_from: port, max_loops: 2}
+  - id: review
+    needs: [runtime]
+    agent: code-reviewer
+    skills: [code-review]
+  - id: db-review
+    needs: [runtime]
+    agent: database-reviewer
+    skills: [odoo-database-analysis]
+  - id: report
+    needs: [review, db-review]
+    agent: documentation-writer
+    skills: [documentation, evidence-generation]

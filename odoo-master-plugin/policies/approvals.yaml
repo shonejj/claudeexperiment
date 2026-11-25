@@ -1,0 +1,24 @@
+# Approval policy used by the workflow engine (approval gates) and the orchestrator.
+modes:
+  checkpoint: "every approval gate waits for a human decision (recorded with --by)"
+  autonomous: "gates auto-approve when risk <= autonomous.max_auto_approve_risk and the gate is not always_human"
+autonomous:
+  max_auto_approve_risk: low       # low | medium
+always_human_risks: [high, critical]
+always_human_actions:              # regardless of mode
+  - production deployment
+  - production database migration or data change
+  - destructive SQL / dropping databases or columns with data
+  - force push / history rewrite
+  - merging pull requests
+  - closing or resolving tickets
+  - posting to public channels
+approval_sources:                  # what counts as an approval record (--by value)
+  - "a person in the current session (name)"
+  - "ticket comment or transition (URL), when the ticket workflow uses label/status approval"
+  - "chat message link from an authorised approver"
+ticket_approval:
+  # Ticket-driven workflows detect approval through the ticket itself; configure per project.
+  label: odoo-master:approved
+  status: ["In Progress", "Approved"]
+  approvers: []                    # empty = anyone with write access in the ticket system

@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.odoo-master/logs/
+.odoo-master/session/
+odoo-master-plugin/evals/results/

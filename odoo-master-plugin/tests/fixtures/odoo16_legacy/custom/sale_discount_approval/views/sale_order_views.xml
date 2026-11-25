@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_discount" model="ir.ui.view">
+        <field name="name">sale.order.form.discount</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="discount_approved" attrs="{'invisible': [('state', '=', 'draft')]}"/>
+                <field name="approval_ref" states="sale"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="discount_request_action" model="ir.actions.act_window">
+        <field name="name">Discount Requests</field>
+        <field name="res_model">sale.discount.request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

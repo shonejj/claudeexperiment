@@ -1,0 +1,52 @@
+schema_version: 1
+name: jira-ticket-planning
+version: 1.0.0
+description: Read a ticket (Jira/Linear/GitHub via discovered MCP capabilities), analyse the linked Odoo repository and post a technical plan + estimate back to the same ticket.
+classification: [ticket_planning]
+triggers: [interactive, jira.issue.labeled, jira.issue.assigned, jira.issue.created, linear.issue.labeled]
+inputs:
+  ticket: {required: true, description: ticket key (e.g. INV-42) or URL}
+  repository: {description: owner/repo or local path when the ticket does not say}
+defaults: {timeout_minutes: 60, retries: 1}
+deliverables: [requirement summary, technical analysis, module + database impact, implementation steps, test plan, risks, estimate, PDF plan, ticket comment]
+steps:
+  - id: capabilities
+    agent: jira-agent
+    skills: [mcp-integration, jira-management]
+    instructions: Resolve ticket.read, ticket.search, ticket.add_comment with `odoo-master mcp resolve`. If missing, run discovery; if still missing, report and continue offline with user-provided text.
+    outputs: [ticket_tools]
+  - id: read-ticket
+    needs: [capabilities]
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.read
+    instructions: Fetch description, comments, attachments list, links; normalise to schemas/ticket.schema.json in .odoo-master/plans/<KEY>/ticket.json.
+    outputs: [ticket_data, repository]
+  - id: analyse-repo
+    needs: [read-ticket]
+    agent: project-analyst
+    skills: [repository-analysis, odoo-project-analysis]
+  - id: actionability
+    needs: [analyse-repo]
+    agent: requirements-analyst
+    skills: [requirements-analysis]
+    instructions: Decide actionable / needs-clarification; list missing requirements as questions.
+    outputs: [actionable, questions, risk]
+  - id: technical-plan
+    needs: [actionability]
+    agent: odoo-architect
+    skills: [architecture-planning, estimation]
+    instructions: Fill templates/jira-comments/plan-comment.md and templates/architecture/technical-plan.md; run odoo-master estimate; render PDF.
+    outputs: [plan_path, pdf_path, estimate_path]
+  - id: post-approval
+    type: approval
+    needs: [technical-plan]
+    instructions: Posting to the ticket is an external write. In checkpoint mode show the comment first.
+    auto_approve_when: "True"
+  - id: post-plan
+    type: notify
+    needs: [post-approval]
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.add_comment
+    instructions: Post the plan comment on the SAME ticket; attach/link the PDF when the integration supports it; record comment id in the execution.

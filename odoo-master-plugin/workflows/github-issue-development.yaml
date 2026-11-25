@@ -1,0 +1,47 @@
+schema_version: 1
+name: github-issue-development
+version: 1.0.0
+description: Plan and implement a GitHub issue in the connected repository, then open a pull request linked to it.
+classification: [github_issue]
+triggers: [interactive, github.issue.labeled, github.issue.created]
+inputs:
+  issue: {required: true, description: owner/repo#number or URL}
+steps:
+  - id: read-issue
+    agent: github-agent
+    skills: [github-management, mcp-integration]
+    capability: repo.read_issue
+    outputs: [ticket_data, risk]
+  - id: analyse
+    needs: [read-issue]
+    agent: project-analyst
+    skills: [repository-analysis, odoo-project-analysis]
+  - id: plan
+    needs: [analyse]
+    agent: solution-architect
+    skills: [architecture-planning, estimation]
+    outputs: [plan_path]
+  - id: plan-approval
+    type: approval
+    needs: [plan]
+    auto_approve_when: "ctx.get('risk') == 'low'"
+  - id: implement
+    needs: [plan-approval]
+    agent: odoo-developer
+    skills: [implementation]
+  - id: verify
+    needs: [implement]
+    agent: qa-engineer
+    skills: [odoo-testing]
+    evidence: [validation, runtime-test]
+    on_failure: {retry_from: implement, max_loops: 3}
+  - id: review
+    needs: [verify]
+    agent: code-reviewer
+    skills: [code-review]
+  - id: pull-request
+    type: notify
+    needs: [review]
+    agent: github-agent
+    skills: [github-management]
+    capability: repo.create_pull_request

@@ -1,0 +1,39 @@
+schema_version: 1
+name: general-development
+version: 1.0.0
+description: Non-Odoo software task in any repository - plan, implement with tests, review, evidence.
+classification: [general_software]
+inputs:
+  request: {required: true}
+  ticket: {}
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake, repository-analysis]
+  - id: plan
+    needs: [intake]
+    agent: solution-architect
+    skills: [architecture-planning, estimation]
+    outputs: [risk]
+  - id: plan-approval
+    type: approval
+    needs: [plan]
+    auto_approve_when: "ctx.get('risk') == 'low'"
+  - id: implement
+    needs: [plan-approval]
+    agent: backend-developer
+    skills: [implementation]
+  - id: test
+    needs: [implement]
+    agent: test-automation-engineer
+    skills: [implementation]
+    evidence: [unit-test]
+    on_failure: {retry_from: implement, max_loops: 3}
+  - id: review
+    needs: [test]
+    agent: code-reviewer
+    skills: [code-review]
+  - id: report
+    needs: [review]
+    agent: documentation-writer
+    skills: [documentation, evidence-generation]

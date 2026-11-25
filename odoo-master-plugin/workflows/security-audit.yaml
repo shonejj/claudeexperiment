@@ -1,0 +1,33 @@
+schema_version: 1
+name: security-audit
+version: 1.0.0
+description: Audit custom modules for access-control gaps, record-rule leaks, unsafe sudo, SQL injection, public routes and secret handling.
+classification: [security_audit]
+inputs:
+  scope: {description: "modules or paths, default all custom"}
+  ticket: {}
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake]
+  - id: static-scan
+    needs: [intake]
+    agent: qa-engineer
+    skills: [odoo-testing]
+    instructions: odoo-master validate (security rules) for all custom modules.
+    evidence: [validation]
+  - id: acl-review
+    needs: [static-scan]
+    agent: odoo-security-specialist
+    skills: [odoo-security]
+    parallel_group: audit
+  - id: code-audit
+    needs: [static-scan]
+    agent: code-reviewer
+    skills: [code-review]
+    parallel_group: audit
+  - id: report
+    needs: [acl-review, code-audit]
+    agent: documentation-writer
+    skills: [documentation]
+    instructions: Findings ranked by severity with file:line and fix; no fixes applied without a follow-up approved workflow.

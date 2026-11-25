@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_budget_view_tree" model="ir.ui.view">
+        <field name="name">purchase.budget.tree</field>
+        <field name="model">purchase.budget</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="amount" readonly="state != 'draft'"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record id="purchase_budget_action" model="ir.actions.act_window">
+        <field name="name">Budgets</field>
+        <field name="res_model">purchase.budget</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

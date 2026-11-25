@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "odoo-master/event-routes.schema.json",
+  "title": "Event routing rules (integrations/events/routes.yaml)",
+  "type": "object",
+  "required": [
+    "routes"
+  ],
+  "properties": {
+    "dispatch": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "record",
+            "execute"
+          ]
+        },
+        "command": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_concurrent": {
+          "type": "integer"
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "secret_env": {
+            "type": "string"
+          },
+          "signature": {
+            "enum": [
+              "github",
+              "slack",
+              "hmac-sha256",
+              "none"
+            ]
+          },
+          "header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "event",
+          "workflow"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "match": {
+            "type": "object"
+          },
+          "workflow": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "object"
+          },
+          "risk": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

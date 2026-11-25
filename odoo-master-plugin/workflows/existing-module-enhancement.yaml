@@ -1,0 +1,74 @@
+schema_version: 1
+name: existing-module-enhancement
+version: 1.0.0
+description: Extend an existing custom module (fields, views, logic) while preserving its architecture and data.
+classification: [module_enhancement]
+triggers: [interactive]
+inputs:
+  request: {required: true}
+  module: {description: target module if known}
+  ticket: {}
+defaults: {timeout_minutes: 90, retries: 1}
+deliverables: [impact analysis, plan + estimate, code + tests, evidence, report]
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake, odoo-project-analysis, odoo-version-detection]
+    outputs: [odoo_version]
+  - id: locate
+    needs: [intake]
+    agent: odoo-architect
+    skills: [odoo-project-analysis, architecture-planning]
+    instructions: Identify the module(s), models, views, ACLs and tests involved (cite file:line). Decide extend-in-place vs. new bridge module (needed when the change couples two independent modules).
+    outputs: [target_module, impact, risk]
+  - id: plan
+    needs: [locate]
+    agent: solution-architect
+    skills: [architecture-planning, estimation]
+    instructions: Implementation plan with exact files, database impact (stored fields? migration script? version bump?) and estimate.
+    outputs: [plan_path, needs_migration]
+  - id: plan-approval
+    type: approval
+    needs: [plan]
+    present: [plan_path, impact, risk]
+    auto_approve_when: "ctx.get('risk') == 'low' and not ctx.get('needs_migration')"
+    on_reject: plan
+  - id: implement
+    needs: [plan-approval]
+    agent: odoo-developer
+    skills: [implementation, odoo-model-development, odoo-view-development]
+    outputs: [branch, changed_files]
+  - id: migration-scripts
+    needs: [implement]
+    when: "ctx.get('needs_migration')"
+    agent: odoo-migration-specialist
+    skills: [odoo-migration]
+    instructions: Bump manifest version; add migrations/<ver>/pre-|post- scripts for renamed/retyped stored fields.
+  - id: validate
+    needs: [implement, migration-scripts]
+    agent: qa-engineer
+    skills: [odoo-testing]
+    evidence: [validation]
+    on_failure: {retry_from: implement, max_loops: 3}
+  - id: runtime-tests
+    needs: [validate]
+    agent: test-automation-engineer
+    skills: [odoo-testing]
+    evidence: [runtime-test]
+    on_failure: {retry_from: implement, max_loops: 3}
+  - id: review
+    needs: [runtime-tests]
+    agent: code-reviewer
+    skills: [code-review]
+    on_failure: {retry_from: implement, max_loops: 2}
+  - id: report
+    needs: [review]
+    agent: documentation-writer
+    skills: [documentation, evidence-generation]
+  - id: ticket-update
+    type: notify
+    needs: [report]
+    when: "inputs.get('ticket')"
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.add_comment
