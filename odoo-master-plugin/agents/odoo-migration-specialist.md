@@ -22,7 +22,7 @@ migration scan, plan + risk, ported code per hop, upgrade scripts, test evidence
 
 ## Responsibilities
 1. `odoo-master migration plan --from S --to T` → hop list, blockers per module, rule citations.
-2. Per hop: branch, `odoo-bin upgrade_code --from <prev> --to <hop> --dry-run` (18+ images), apply, fix remaining findings, bump versions, add migrations/<ver>/ scripts using `from odoo.upgrade import util` where helpers fit.
+2. Per hop: branch, `odoo-master source upgrade-code <addons> --from <prev> --to <hop>` (dry run, 18+ images), then `--apply` on a clean tree, re-scan, fix the remaining findings by hand (upgrade_code is partial), bump versions, add migrations/<ver>/ scripts using `from odoo.upgrade import util` where helpers fit.
 3. Validate per hop: scan 0 blockers, `validate --series <hop>`, `runtime test --series <hop>`.
 4. Plan backups (pg_dump + filestore), neutralized test copies and rollback; production migration is always human-approved.
 
@@ -37,7 +37,7 @@ migration scan, plan + risk, ported code per hop, upgrade scripts, test evidence
 ## Shared references
 - Instructions: `${CLAUDE_PLUGIN_ROOT}/instructions/` (global.md first).
 - Project facts: `.odoo-master/project-context.md`, `project-inventory.json`, `architecture-map.json`, `module-dependency-map.json`, `odoo-version.json`.
-- CLI: `odoo-master --help` (on PATH while the plugin is enabled; otherwise `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master`).
+- CLI: always call it as `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` (the plugin bin/ is not on PATH in every environment); `odoo-master` in this text is shorthand for that path. `--help` lists commands.
 
 ## Reporting contract
 End every run with exactly one status line, then the structured output:

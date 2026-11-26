@@ -1,21 +1,39 @@
 {
   "name": "odoo-master",
   "displayName": "Odoo Master",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Agentic Odoo ERP engineering for Claude Code: version-aware Odoo 16-20 expert agents, project intelligence, validators, runtime testing in Docker, migrations, database safety, MCP capability discovery, Jira/GitHub/Slack ticket lifecycle, workflow engine with approval gates, evidence and PDF reports.",
-  "author": { "name": "shonejj", "url": "https://github.com/shonejj" },
+  "author": {
+    "name": "shonejj",
+    "url": "https://github.com/shonejj"
+  },
   "homepage": "https://github.com/shonejj/claudeexperiment",
   "repository": "https://github.com/shonejj/claudeexperiment",
   "license": "MIT",
-  "keywords": ["odoo", "erp", "agents", "migration", "postgresql", "mcp", "jira", "workflow", "qa"],
-  "workflows": ["./claude-workflows/odoo-parallel-review.js"],
+  "keywords": [
+    "odoo",
+    "erp",
+    "agents",
+    "migration",
+    "postgresql",
+    "mcp",
+    "jira",
+    "workflow",
+    "qa"
+  ],
+  "workflows": [
+    "./claude-workflows/odoo-parallel-review.js"
+  ],
   "userConfig": {
     "autonomy": {
       "type": "string",
       "title": "Autonomy mode",
       "description": "checkpoint: stop for human approval at every approval gate in a workflow. autonomous: auto-approve gates whose risk is at or below the policy threshold (high-risk and production gates always stop).",
       "default": "checkpoint",
-      "options": ["checkpoint", "autonomous"]
+      "options": [
+        "checkpoint",
+        "autonomous"
+      ]
     },
     "production_patterns": {
       "type": "string",
@@ -28,6 +46,38 @@
       "title": "Fallback Odoo version",
       "description": "Used only when no version can be detected from the project. Leave empty to require detection or an explicit answer.",
       "default": ""
+    },
+    "enterprise_path": {
+      "type": "directory",
+      "title": "Enterprise addons path",
+      "description": "Optional local checkout of Odoo Enterprise addons. Mounted read-only into runtime test containers; never modified.",
+      "default": ""
+    },
+    "postgres_image": {
+      "type": "string",
+      "title": "PostgreSQL image for runtime tests",
+      "description": "Docker image used for disposable test databases.",
+      "default": "postgres:16"
+    },
+    "ticket_approval_label": {
+      "type": "string",
+      "title": "Ticket approval label",
+      "description": "Label that marks a ticket plan as approved for implementation (Jira/Linear/GitHub).",
+      "default": "odoo-master:approved"
+    },
+    "report_formats": {
+      "type": "string",
+      "title": "Report formats",
+      "description": "Formats rendered for plans and reports.",
+      "default": "html,pdf",
+      "options": [
+        "html,pdf",
+        "html",
+        "pdf"
+      ]
     }
+  },
+  "engines": {
+    "claude-code": ">=2.1.300"
   }
 }

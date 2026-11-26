@@ -3,6 +3,8 @@ name: jira-management
 description: "Ticket lifecycle through any connected ticketing MCP server (Jira, Linear, GitHub Issues, others): discover tools by capability, search/read and normalise tickets, check approval signals, post plan/progress/completion comments to the same ticket, link reports and PRs, and transition only when authorised. Use for anything involving a ticket key, ticket URL or 'my tickets'."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Ticket management (Jira & compatible)
 
 ## 0. Capabilities, not tool names

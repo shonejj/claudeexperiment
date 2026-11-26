@@ -9,6 +9,8 @@
 | 20.0 | ✓ | ✓ | ✓ (704) | `odoo:20.0` | `ir.access`, OWL 3 |
 | SaaS x.y | maps to nearest major | rules by `since` | nearest major | — | Odoo Online only |
 
+- Scaffolded modules (`odoo-master scaffold`) were install/upgrade/test-verified live on all five series. A live 17→18→19
+  migration chain is recorded in `docs/testing.md`.
 - Version facts were verified against the documentation sources (`odoo/documentation`) and the source code
   inside the official images; see `docs/research/odoo-version-compatibility.md`.
 - **Community vs Enterprise**: detection works for both. Enterprise dependencies are flagged from a known

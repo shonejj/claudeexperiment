@@ -3,6 +3,7 @@ name: odoo-owl-development
 description: "Odoo web client JavaScript with OWL: components, templates, hooks, services, registries (fields, views, actions, systray), patch(), asset bundles, JS tests (Hoot 18+, QUnit before), and OWL 3 changes in Odoo 20. Use for custom widgets, client actions and frontend behaviour."
 ---
 
+
 # OWL development
 
 ```js

@@ -33,7 +33,7 @@ wireframes in .odoo-master/architecture/wireframes/, view placement spec
 ## Shared references
 - Instructions: `${CLAUDE_PLUGIN_ROOT}/instructions/` (global.md first).
 - Project facts: `.odoo-master/project-context.md`, `project-inventory.json`, `architecture-map.json`, `module-dependency-map.json`, `odoo-version.json`.
-- CLI: `odoo-master --help` (on PATH while the plugin is enabled; otherwise `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master`).
+- CLI: always call it as `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` (the plugin bin/ is not on PATH in every environment); `odoo-master` in this text is shorthand for that path. `--help` lists commands.
 
 ## Reporting contract
 End every run with exactly one status line, then the structured output:

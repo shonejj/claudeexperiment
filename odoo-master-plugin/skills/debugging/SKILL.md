@@ -3,6 +3,8 @@ name: debugging
 description: "Systematic root-cause debugging for Odoo and general code: reproduce, read the traceback and logs, form and test hypotheses, locate the responsible module and override chain, fix with a regression test. Use for any error, traceback, failing test or wrong behaviour."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Debugging
 
 1. **Reproduce**: failing test (preferred), runtime log (`odoo-master runtime test` / user log), or exact steps. No reproduction → gather more data, do not guess-fix.

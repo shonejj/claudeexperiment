@@ -3,6 +3,8 @@ name: github-management
 description: "GitHub operations via the GitHub MCP server or gh CLI when authorised: repository discovery, default branch, branches, issues, pull requests (create/update with ticket links), CI check inspection and review comments, with git safety rules. Use for branch, PR, issue and CI steps."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # GitHub management
 
 - Capabilities: `repo.read_issue`, `repo.create_branch`, `repo.create_pull_request`, `repo.update_pull_request`, `repo.inspect_checks`, `repo.add_comment`, `repo.read_pull_request` (`odoo-master mcp resolve <cap>`). Fallback: `gh` CLI if installed and authenticated; otherwise local git only.

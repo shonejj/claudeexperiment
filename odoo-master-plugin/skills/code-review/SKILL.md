@@ -3,6 +3,8 @@ name: code-review
 description: "Independent two-verdict code review (spec compliance + quality) of a diff with Odoo-aware checks: version rules, super() in overrides, ACLs and rules, batching, migrations for stored fields, tests, security, and running the validator. Use after implementation steps, before PRs, or when asked to review."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Code review
 
 Input: diff (`git diff <base>...HEAD`), spec/acceptance criteria, validation evidence.

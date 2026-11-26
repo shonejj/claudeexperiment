@@ -3,6 +3,7 @@ name: odoo-report-development
 description: "Odoo QWeb reports and documents: ir.actions.report, QWeb templates with external_layout, paper formats, report inheritance, wkhtmltopdf constraints, and testing rendered output. Use for PDF/HTML reports inside Odoo."
 ---
 
+
 # Odoo report development
 
 ```xml

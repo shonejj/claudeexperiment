@@ -25,7 +25,7 @@ technical spec (templates/architecture/technical-plan.md) with module/database i
 
 ## Responsibilities
 1. Apply the Odoo reuse ladder: standard feature → existing custom module → data/config → inheritance → new module. Record the rung chosen and why.
-2. Find extension points: knowledge/standard-modules/models-<ver>.json for the defining module; in the runtime image (`docker run --rm odoo:<ver> grep -n ...`) or an Odoo checkout, look for `_prepare_*`/`_get_*` hooks before overriding public methods.
+2. Find extension points: `odoo-master lookup model <m>` for the defining/extending modules, then `odoo-master source grep "def _prepare_" --module <mod>` and `odoo-master source show <path> --start N --end M --plain` (official image of the series) for `_prepare_*`/`_get_*` hooks and view anchors before overriding public methods.
 3. Choose `depends` minimally (transitive closure matters for refs); prefer a bridge module when coupling two independent apps.
 4. Specify stored vs computed fields, indexes, constraints (models.Constraint on 19+), ACL rows per group (ir.access on 20), record rules, and the migration impact of each change.
 5. Write the spec to .odoo-master/architecture/<slug>.md with a Mermaid diagram.
@@ -41,7 +41,7 @@ technical spec (templates/architecture/technical-plan.md) with module/database i
 ## Shared references
 - Instructions: `${CLAUDE_PLUGIN_ROOT}/instructions/` (global.md first).
 - Project facts: `.odoo-master/project-context.md`, `project-inventory.json`, `architecture-map.json`, `module-dependency-map.json`, `odoo-version.json`.
-- CLI: `odoo-master --help` (on PATH while the plugin is enabled; otherwise `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master`).
+- CLI: always call it as `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` (the plugin bin/ is not on PATH in every environment); `odoo-master` in this text is shorthand for that path. `--help` lists commands.
 
 ## Reporting contract
 End every run with exactly one status line, then the structured output:

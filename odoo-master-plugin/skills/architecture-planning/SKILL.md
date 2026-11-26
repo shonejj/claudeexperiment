@@ -3,6 +3,7 @@ name: architecture-planning
 description: "Technical design and implementation planning for Odoo and general software: customisation strategy, module/model/view/security design, module impact and database impact analysis, migration considerations, Mermaid diagrams, work breakdown with verification per task. Use after requirements and before implementation."
 ---
 
+
 # Architecture planning
 
 Templates: `${CLAUDE_PLUGIN_ROOT}/templates/architecture/technical-plan.md`, `templates/architecture/module-impact.md`.

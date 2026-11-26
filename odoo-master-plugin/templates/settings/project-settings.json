@@ -1,0 +1,27 @@
+{
+  "$comment": "Recommended project permissions for Odoo Master. Merged additively into .claude/settings.json by `odoo-master init --settings` (a .bak backup is written first). Permissions are the real boundary; the plugin's guard hook is only a guard-rail.",
+  "permissions": {
+    "allow": [
+      "Bash(odoo-master *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git switch -c odoo-master/*)",
+      "Bash(docker ps*)",
+      "Bash(docker images*)"
+    ],
+    "ask": [
+      "Bash(git push*)",
+      "Bash(docker run*)",
+      "Bash(psql*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(dropdb*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.pgpass)"
+    ]
+  }
+}

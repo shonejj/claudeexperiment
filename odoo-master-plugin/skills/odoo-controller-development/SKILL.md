@@ -3,6 +3,7 @@ name: odoo-controller-development
 description: "Odoo HTTP controllers: routes, type http/json/jsonrpc, auth user/public/none/bearer, CSRF, request.env, portal/website pages, JSON APIs and safe sudo usage. Use when adding endpoints, portal pages or webhooks inside Odoo."
 ---
 
+
 # Odoo controllers
 
 ```python

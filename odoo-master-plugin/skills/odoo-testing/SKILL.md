@@ -3,6 +3,8 @@ name: odoo-testing
 description: "Testing Odoo modules: static validation with odoo-master, Python tests (TransactionCase, HttpCase, Form, tagged), JS tests and tours, running install/upgrade test passes in ephemeral Docker databases, reading results, and recording evidence. Use whenever code changes need verification."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Odoo testing
 
 ## Levels (always report which ran)

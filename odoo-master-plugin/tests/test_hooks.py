@@ -77,6 +77,14 @@ def test_prompt_refs_and_mcp_failure(fx):
     ctx = out["hookSpecificOutput"]["additionalContext"]
     assert "INV-42" in ctx and "Slack thread" in ctx
     assert run_hook("prompt", {"cwd": str(root), "prompt": "hello there"})[1] == ""
+    (root / ".odoo-master").mkdir(exist_ok=True)
+    (root / ".odoo-master/odoo-version.json").write_text('{"version": "18.0"}')
+    rc, out2 = run_hook("prompt", {"cwd": str(root), "prompt": "Give me a plan and an estimate for lot checks"})
+    assert "estimate --input" in out2["hookSpecificOutput"]["additionalContext"]
+    (root / ".odoo-master/odoo-version.json").write_text('{"version": "18.0", "conflicts": [{"type": "mixed_syntax"}]}')
+    rc, out3 = run_hook("prompt", {"cwd": str(root), "prompt": "Fix this module properly (Odoo 18)"})
+    assert "recorded as the confirmed target series" in out3["hookSpecificOutput"]["additionalContext"]
+    assert "confirmed_odoo_version: '18.0'" in (root / ".odoo-master/config.yaml").read_text() or 'confirmed_odoo_version: "18.0"' in (root / ".odoo-master/config.yaml").read_text()
     rc, out = run_hook("mcp-failure", {"cwd": str(root), "session_id": "s", "tool_name": "mcp__atlassian__getJiraIssue",
                                         "error": "401 Unauthorized token=abcdef1234567890"})
     assert "reconnect" in out["hookSpecificOutput"]["additionalContext"]
@@ -92,3 +100,40 @@ def test_precompact_and_bad_payload(fx):
     from conftest import PLUGIN
     p = subprocess.run([sys.executable, str(PLUGIN / "scripts/hook.py"), "guard"], input="not json", capture_output=True, text=True, cwd=root)
     assert p.returncode == 0
+
+
+def test_stop_gate_requires_one_validation_run(fx):
+    import subprocess
+    from conftest import PLUGIN
+    root = fx("odoo18_project")
+    f = root / "addons/stock_quality_check/models/quality_check.py"
+    run_hook("post-edit", {"cwd": str(root), "session_id": "v1", "tool_name": "Edit", "tool_input": {"file_path": str(f)}})
+    first = run_hook("stop-gate", {"cwd": str(root), "session_id": "v1"})[1]
+    assert first["decision"] == "block" and "no validation was run" in first["reason"]
+    assert run_hook("stop-gate", {"cwd": str(root), "session_id": "v1"})[1] == ""        # only once
+    # with evidence captured, no nudge at all
+    run_hook("post-edit", {"cwd": str(root), "session_id": "v2", "tool_name": "Edit", "tool_input": {"file_path": str(f)}})
+    p = subprocess.run([str(PLUGIN / "bin/odoo-master"), "--root", str(root), "validate"], capture_output=True, text=True)
+    run_hook("evidence-capture", {"cwd": str(root), "session_id": "v2", "tool_name": "Bash", "tool_input": {"command": "odoo-master validate"},
+                                  "tool_response": {"stdout": p.stdout}})
+    assert run_hook("stop-gate", {"cwd": str(root), "session_id": "v2"})[1] == ""
+
+
+def test_stop_gate_ignores_preexisting_findings(fx):
+    root = fx("broken_module")
+    (root / ".odoo-master").mkdir()
+    (root / ".odoo-master/odoo-version.json").write_text('{"version": "18.0"}')
+    f = root / "addons/broken_mod/models/things.py"
+    payload = {"cwd": str(root), "session_id": "pre", "tool_name": "Edit", "tool_input": {"file_path": str(f), "new_string": "x"}}
+    run_hook("guard", payload)                                  # baseline snapshot before the edit
+    src = f.read_text().replace("'%s'\" % term", "%s\", (term,)").replace("return eval(term)", "return term")
+    f.write_text(src)                                           # the session fixes do_it only
+    run_hook("post-edit", payload)
+    out = run_hook("stop-gate", {"cwd": str(root), "session_id": "pre"})[1]
+    assert out == "" or out.get("decision") != "block" or "no validation was run" in out.get("reason", "")
+    # introducing a NEW error in the same file still blocks
+    f.write_text(f.read_text() + "\n\ndef bad(cr, t):\n    cr.execute(f\"SELECT {t}\")\n")
+    out2 = run_hook("stop-gate", {"cwd": str(root), "session_id": "pre"})[1]
+    if out2.get("reason", "").startswith("odoo-master: you changed"):
+        out2 = run_hook("stop-gate", {"cwd": str(root), "session_id": "pre"})[1]
+    assert out2["decision"] == "block" and "py-sql-injection" in out2["reason"]

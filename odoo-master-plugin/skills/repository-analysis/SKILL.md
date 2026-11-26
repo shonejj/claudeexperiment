@@ -3,6 +3,8 @@ name: repository-analysis
 description: "Analyses any git repository (Odoo or not): structure, git state, branches, recent history, environment files (Docker, compose, odoo.conf with secrets redacted, CI), conventions and existing instructions. Use when connecting a repository or before planning changes in unfamiliar code."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Repository analysis
 
 1. `odoo-master analyze --brief` (writes `.odoo-master/` knowledge files; secrets in configs are redacted).

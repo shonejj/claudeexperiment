@@ -20,10 +20,10 @@ rules:
   - id: attrs-states-removed
     since: "17.0"
     files: ["*.xml"]
-    pattern: '\s(attrs|states)\s*='
+    pattern: '\s(attrs|states)\s*=|<attribute\s+name=["\x27](attrs|states)["\x27]'
     severity: error
     fingerprint: "<since"
-    message: 'View attributes "attrs" and "states" are rejected since 17.0. Use invisible="expr", readonly="expr", required="expr", column_invisible="expr".'
+    message: 'View attributes "attrs" and "states" (also via <attribute name="attrs">) are rejected since 17.0. Use invisible="expr", readonly="expr", required="expr", column_invisible="expr" (and <attribute name="invisible"> in inherited views).'
     doc: "odoo/addons/base/models/ir_ui_view.py (17.0+): 'Since 17.0, the \"attrs\" and \"states\" attributes are no longer used'"
   - id: init-hook-env
     since: "17.0"
@@ -124,11 +124,11 @@ rules:
   - id: groups-category-to-privilege
     since: "19.0"
     files: ["*.xml"]
-    pattern: '<field\s+name=["\x27]category_id["\x27]'
-    severity: warning
+    pattern: 'model=["\x27]res\.groups["\x27][^>]*>(?:(?!</record>)[\s\S])*?<field\s+name=["\x27]category_id["\x27]'
+    severity: error
     fingerprint: "<since"
-    message: "res.groups are organised by res.groups.privilege (privilege_id) since 19.0; category_id on groups moved to the privilege. Review group definitions."
-    doc: "odoo/addons/base/models/res_groups.py (19.0)"
+    message: "res.groups has no category_id field since 19.0 (install fails: Invalid field 'category_id' in 'res.groups'). Create a res.groups.privilege record (optionally with category_id) and set privilege_id on the groups."
+    doc: "odoo/addons/base/models/res_groups.py + res_groups_privilege.py (19.0); verified by a failed live install on odoo:19.0"
   - id: osv-deprecated
     since: "19.0"
     files: ["*.py"]

@@ -17,8 +17,12 @@ MAX_CONTEXT_CHARS = 2600
 
 
 def bootstrap(root: Path, source: str = "startup") -> dict:
-    cfg = load_config(root)
+    from ..config import plugin_options_from_env
     sd = state_dir(root)
+    opts = plugin_options_from_env()
+    if opts:
+        write_json(sd / "session" / "plugin-options.json", opts)  # git-ignored; lets the CLI see plugin options
+    cfg = load_config(root)
     inv_path = sd / "project-inventory.json"
     ver_path = sd / "odoo-version.json"
     from ..odoo.version import detect
@@ -57,7 +61,8 @@ def render(info: dict) -> str:
     lines = ["[odoo-master] Odoo engineering plugin active."]
     if info["is_odoo_project"]:
         lines.append(f"- Odoo version: {info['odoo_version'] or 'unknown'} (confidence {info['confidence']})"
-                     + (f" — {info['conflicts']} CONFLICTING signal(s): confirm the version before editing." if info["conflicts"] else ""))
+                     + (f" — {info['conflicts']} CONFLICTING signal(s): ASK the user which series is targeted, then run `odoo-master detect-version --confirm <series>`; "
+                        "edits to module code are held for approval until then." if info["conflicts"] else ""))
         lines.append(f"- Custom modules: {info['module_count']}" + (" (project analysis stale/missing: run `odoo-master analyze --brief` or /odoo-master:project-intake before planning)" if info["inventory_stale"] else ""))
         lines.append("- Knowledge files: .odoo-master/project-context.md, project-inventory.json, architecture-map.json, module-dependency-map.json")
     else:
@@ -69,6 +74,13 @@ def render(info: dict) -> str:
             lines.append(f"  - {e['id']} {e['workflow']} [{e['status']}] ticket={e['ticket']} steps={','.join(e['waiting'])}")
     if info["mcp_capabilities"]:
         lines.append(f"- Registered MCP capabilities: {', '.join(info['mcp_capabilities'][:20])}")
+    from ..util import PLUGIN_ROOT
+    cli = f"{PLUGIN_ROOT}/bin/odoo-master"
+    lines.append(f"- CLI: {cli} (use this absolute path; `odoo-master` may not be on PATH).")
+    if info["is_odoo_project"]:
+        lines.append(f"- Toolbox: verify Odoo changes with `{cli} validate --brief` (static) and `{cli} runtime test --modules <m>` (real Odoo in Docker); "
+                     f"new modules via `{cli} scaffold <name>`; estimates via `{cli} estimate --input <json>`; standard code via `{cli} lookup model <m>` / "
+                     f"`{cli} source grep <regex> --module <mod>`. Report which verification levels ran and which did not.")
     lines.append("- Entry points: /odoo-master:project-intake (any request), /odoo-master:jira-management, /odoo-master:odoo-migration, "
                  "/odoo-master:mcp-integration. Rules: never edit Odoo core; follow the reuse ladder; cite file:line; never claim untested levels.")
     text = "\n".join(lines)

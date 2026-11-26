@@ -3,6 +3,7 @@ quality_gate:
   enabled: true
   block_on: [error]               # static validation severities that block finishing
   max_blocks_per_session: 3        # then report instead of blocking (avoid loops)
+  require_validation_run: true      # once per session: changed Odoo files but no `odoo-master validate` evidence -> ask for it
 required_levels:
   bug_fix: [static, runtime]
   new_module: [static, runtime]

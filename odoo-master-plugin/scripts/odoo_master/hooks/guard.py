@@ -77,6 +77,15 @@ def check_edit(file_path: str, content: str, root: Path, cfg: dict) -> tuple[str
     if any(rel == c or rel.startswith(c.rstrip("/") + "/") for c in core_paths) or _match_any(rel, prot.get("ask", [])):
         return "ask", (f"Odoo core/Enterprise file {rel}: standard code must not be modified. "
                        "Use _inherit / view inheritance / patch() in a custom module instead. Approve only if this is intentional.")
+    ver = read_json(state_dir(root, create=False) / "odoo-version.json") or {}
+    if ver.get("conflicts") and Path(file_path).suffix in (".py", ".xml", ".csv", ".js"):
+        fp = Path(file_path).resolve()
+        if any((anc / "__manifest__.py").exists() for anc in fp.parents if str(anc).startswith(str(root))):
+            kinds = ", ".join(sorted({c.get("type", "?") for c in ver["conflicts"]}))
+            from ..util import PLUGIN_ROOT
+            return "ask", (f"Odoo version signals conflict ({kinds}); detected {ver.get('version')}. If the user already named the target series, "
+                           f"record it with `{PLUGIN_ROOT}/bin/odoo-master detect-version --confirm <series>`; otherwise ask the user first. "
+                           "Module code edits are held until the series is confirmed.")
     for pat in sec.get("secrets", {}).get("block_commit_patterns", []):
         if content and re.search(pat, content):
             if rel.endswith((".example", ".sample", ".md")) and "REDACTED" in content:
@@ -98,6 +107,12 @@ def main(payload: dict) -> int:
         res = check_edit(ti.get("file_path") or ti.get("notebook_path") or "", content, root, cfg)
     if res:
         return _decide(res[0], res[1], payload)
+    if tool in ("Edit", "Write", "MultiEdit") and ti.get("file_path"):
+        from .post_edit import snapshot_baseline
+        try:
+            snapshot_baseline(payload, ti["file_path"])   # pre-existing findings, so the Stop gate only blocks on new ones
+        except Exception:  # noqa: BLE001 - never block an edit because the snapshot failed
+            pass
     return 0
 
 

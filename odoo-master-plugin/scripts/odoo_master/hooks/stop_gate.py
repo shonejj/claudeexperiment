@@ -34,14 +34,32 @@ def main(payload: dict) -> int:
             pass
     block_on = set(gate.get("block_on", ["error"]))
     # Only findings in files touched this session (pre-existing issues elsewhere are reported, not blocking)
-    blocking = [f for f in res["findings"] if f["severity"] in block_on and f["file"] in changed_rel]
-    other = [f for f in res["findings"] if f["severity"] == "error" and f["file"] not in changed_rel]
     sd = session_dir(payload)
+    from .post_edit import finding_key
+    baseline = (read_json(sd / "baseline.json") or {}).get("files", {})
+    def preexisting(f):
+        return finding_key(f, root) in set(baseline.get(f["file"], []))
+    in_changed = [f for f in res["findings"] if f["severity"] in block_on and f["file"] in changed_rel]
+    blocking = [f for f in in_changed if not preexisting(f)]
+    other = [f for f in res["findings"] if f["severity"] == "error" and (f["file"] not in changed_rel or preexisting(f))]
     state = read_json(sd / "gate.json") or {"blocks": 0}
     write_json(sd / "last-validation.json", res)
     if not blocking:
+        evidence_recorded = (sd / "last-evidence.json").exists()
+        odoo_files = [f for f in changed_rel if f.endswith((".py", ".xml", ".csv", ".js"))]
+        if odoo_files and not evidence_recorded and not state.get("verification_nudged") and gate.get("require_validation_run", True):
+            state["verification_nudged"] = True
+            write_json(sd / "gate.json", state)
+            from ..util import PLUGIN_ROOT
+            out({"decision": "block", "reason": (
+                f"odoo-master: you changed Odoo files ({', '.join(odoo_files[:5])}) but no validation was run in this session. "
+                f"Run `{PLUGIN_ROOT}/bin/odoo-master validate --files {' '.join(odoo_files[:5])} --brief` "
+                "(and `runtime test --modules <m>` if Docker is available). Then give your complete final answer again: what you changed and why "
+                "(root cause), and which verification levels ran and which did not.")})
+            return 0
         if other:
-            out({"systemMessage": f"odoo-master: {len(other)} pre-existing validation error(s) in changed modules (not introduced in files edited this session)."})
+            out({"systemMessage": f"odoo-master: {len(other)} pre-existing validation error(s) in the touched modules were not introduced this session "
+                                  "(not blocking; mention them to the user if relevant)."})
         return 0
     if state["blocks"] >= int(gate.get("max_blocks_per_session", 3)):
         out({"systemMessage": f"odoo-master quality gate: {len(blocking)} error(s) remain after {state['blocks']} attempts — report them as unresolved."})

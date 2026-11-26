@@ -1,11 +1,16 @@
 ---
 name: odoo-project-analysis
 description: "Deep Odoo-specific analysis of a codebase: custom vs standard modules, inherited standard models, view inheritance chains, security definitions, dependency graph (cycles, unknown/Enterprise deps), tests, controllers, OWL components, and incomplete implementations. Use to understand an existing Odoo project or a feature area before designing changes."
+allowed-tools:
+  - "Bash(odoo-master *)"
+  - "Bash(${CLAUDE_PLUGIN_ROOT}/bin/odoo-master *)"
 ---
+
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
 
 # Odoo project analysis
 
-Facts: !`"${CLAUDE_PLUGIN_ROOT}/bin/odoo-master" inventory --summary 2>/dev/null | head -60 || true`
+Facts: !`${CLAUDE_PLUGIN_ROOT}/bin/odoo-master --soft --max-lines 60 inventory --summary`
 
 ## Read the knowledge model
 - `.odoo-master/project-inventory.json` → per module: manifest, models (fields, methods, `calls_super`), views (`inherit_id`), actions, menus, ACL rows, rules, groups, controllers (routes/auth), OWL component count, tests, migrations.
@@ -16,7 +21,7 @@ Facts: !`"${CLAUDE_PLUGIN_ROOT}/bin/odoo-master" inventory --summary 2>/dev/null
 1. Identify the business flow (e.g. receipts → `stock.picking` with `picking_type_code='incoming'`).
 2. Collect custom touch points (fields/methods/views/rules) with `path:line`.
 3. Identify the standard module that owns the flow (`knowledge/standard-modules/models-<ver>.json`) and its extension hooks. With Docker available, inspect real standard source without cloning:
-   `docker run --rm --entrypoint grep odoo:<ver> -rn "def _prepare_picking" /usr/lib/python3/dist-packages/odoo/addons/stock/models/`
+   `odoo-master source grep "def _prepare_picking" --module stock --series <ver>` (and `odoo-master lookup model stock.picking` for the defining/extending modules)
 4. Detect incomplete implementations: fields never shown in views, views referencing missing fields, models without ACL, computes without `@api.depends`, overrides without `super()`, TODO/FIXME markers, modules without tests.
 5. Separate **code-level** knowledge from **database-level** knowledge (installed modules, data volumes, actual schema) — the latter needs `odoo-database-analysis` with an authorised database.
 
