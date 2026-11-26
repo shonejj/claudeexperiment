@@ -14,6 +14,10 @@ HOOKS = {
     "prompt": ("odoo_master.hooks.misc", "run_prompt"),
     "mcp-post": ("odoo_master.hooks.misc", "run_mcp_post"),
     "mcp-failure": ("odoo_master.hooks.misc", "run_mcp_failure"),
+    "subagent-start": ("odoo_master.hooks.agents", "run_subagent_start"),
+    "subagent-stop": ("odoo_master.hooks.agents", "run_subagent_stop"),
+    "session-end": ("odoo_master.hooks.agents", "run_session_end"),
+    "evidence-capture": ("odoo_master.hooks.agents", "run_evidence_capture"),
 }
 
 if __name__ == "__main__":

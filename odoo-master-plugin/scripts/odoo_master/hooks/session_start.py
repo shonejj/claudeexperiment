@@ -17,8 +17,12 @@ MAX_CONTEXT_CHARS = 2600
 
 
 def bootstrap(root: Path, source: str = "startup") -> dict:
-    cfg = load_config(root)
+    from ..config import plugin_options_from_env
     sd = state_dir(root)
+    opts = plugin_options_from_env()
+    if opts:
+        write_json(sd / "session" / "plugin-options.json", opts)  # git-ignored; lets the CLI see plugin options
+    cfg = load_config(root)
     inv_path = sd / "project-inventory.json"
     ver_path = sd / "odoo-version.json"
     from ..odoo.version import detect

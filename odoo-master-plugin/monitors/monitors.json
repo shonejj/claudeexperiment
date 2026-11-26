@@ -1,0 +1,8 @@
+[
+  {
+    "name": "odoo-master-workflow-watch",
+    "command": "\"${CLAUDE_PLUGIN_ROOT}/bin/odoo-master\" watch --interval 15",
+    "description": "Odoo Master: approval requests, finished/failed workflow executions, new webhook events and hook errors",
+    "when": "on-skill-invoke:workflow-execution"
+  }
+]

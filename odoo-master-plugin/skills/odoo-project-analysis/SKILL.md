@@ -1,11 +1,12 @@
 ---
 name: odoo-project-analysis
 description: "Deep Odoo-specific analysis of a codebase: custom vs standard modules, inherited standard models, view inheritance chains, security definitions, dependency graph (cycles, unknown/Enterprise deps), tests, controllers, OWL components, and incomplete implementations. Use to understand an existing Odoo project or a feature area before designing changes."
+allowed-tools: "Bash(odoo-master *)"
 ---
 
 # Odoo project analysis
 
-Facts: !`"${CLAUDE_PLUGIN_ROOT}/bin/odoo-master" inventory --summary 2>/dev/null | head -60 || true`
+Facts: !`odoo-master --soft --max-lines 60 inventory --summary`
 
 ## Read the knowledge model
 - `.odoo-master/project-inventory.json` → per module: manifest, models (fields, methods, `calls_super`), views (`inherit_id`), actions, menus, ACL rows, rules, groups, controllers (routes/auth), OWL component count, tests, migrations.

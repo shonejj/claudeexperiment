@@ -2,12 +2,13 @@
 name: project-intake
 description: "Entry point for any request in an Odoo (or other) repository: establishes project facts, classifies the request (new module, enhancement, bug, migration, database, performance, security, deployment, ticket, PR review, general software), selects the workflow and agents, and starts it. Use whenever a user describes work to be done and no workflow is running."
 argument-hint: "[request]"
+allowed-tools: "Bash(odoo-master *)"
 ---
 
 # Project intake
 
 Current project facts (generated now):
-!`"${CLAUDE_PLUGIN_ROOT}/bin/odoo-master" analyze --brief 2>/dev/null || echo "analysis unavailable"`
+!`odoo-master --soft analyze --brief`
 
 Request: $ARGUMENTS
 

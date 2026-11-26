@@ -56,15 +56,20 @@ def load_config(project_root: Path | str | None = None) -> dict:
     proj = root / STATE_DIR_NAME / "config.yaml"
     if proj.is_file():
         cfg = deep_merge(cfg, _safe_yaml(proj))
-    # userConfig from plugin settings
-    uc = {
-        "autonomy": os.environ.get("CLAUDE_PLUGIN_OPTION_AUTONOMY"),
-        "production_patterns": os.environ.get("CLAUDE_PLUGIN_OPTION_PRODUCTION_PATTERNS"),
-        "default_odoo_version": os.environ.get("CLAUDE_PLUGIN_OPTION_DEFAULT_ODOO_VERSION"),
-    }
-    for k, v in uc.items():
-        if v not in (None, ""):
-            cfg[k] = v
+    # userConfig (plugin options). Hooks receive CLAUDE_PLUGIN_OPTION_*; the SessionStart hook persists them
+    # to .odoo-master/session/plugin-options.json so the CLI (run from the Bash tool) sees the same values.
+    uc = read_plugin_options(root)
+    for k in ("autonomy", "production_patterns", "default_odoo_version"):
+        if uc.get(k) not in (None, ""):
+            cfg[k] = uc[k]
+    if uc.get("enterprise_path"):
+        cfg.setdefault("runtime", {})["enterprise_path"] = uc["enterprise_path"]
+    if uc.get("postgres_image"):
+        cfg.setdefault("runtime", {})["postgres_image"] = uc["postgres_image"]
+    if uc.get("ticket_approval_label"):
+        cfg.setdefault("policies", {}).setdefault("approvals", {}).setdefault("ticket_approval", {})["label"] = uc["ticket_approval_label"]
+    if uc.get("report_formats"):
+        cfg.setdefault("reports", {})["formats"] = [f.strip() for f in uc["report_formats"].split(",") if f.strip()]
     for k in ("autonomy", "production_patterns", "default_odoo_version"):
         v = os.environ.get(f"ODOO_MASTER_{k.upper()}")
         if v not in (None, ""):
@@ -75,6 +80,27 @@ def load_config(project_root: Path | str | None = None) -> dict:
     cfg.setdefault("production_patterns", ["prod", "production", "live"])
     cfg["_project_root"] = str(root)
     return cfg
+
+
+OPTION_KEYS = ("autonomy", "production_patterns", "default_odoo_version", "enterprise_path", "postgres_image",
+               "ticket_approval_label", "report_formats")
+
+
+def plugin_options_from_env() -> dict:
+    return {k: os.environ[f"CLAUDE_PLUGIN_OPTION_{k.upper()}"] for k in OPTION_KEYS
+            if os.environ.get(f"CLAUDE_PLUGIN_OPTION_{k.upper()}") not in (None, "")}
+
+
+def read_plugin_options(root: Path) -> dict:
+    env = plugin_options_from_env()
+    if env:
+        return env
+    import json
+    p = Path(root) / STATE_DIR_NAME / "session" / "plugin-options.json"
+    try:
+        return json.loads(p.read_text()) if p.exists() else {}
+    except (OSError, ValueError):
+        return {}
 
 
 def policy(cfg: dict, name: str) -> dict:

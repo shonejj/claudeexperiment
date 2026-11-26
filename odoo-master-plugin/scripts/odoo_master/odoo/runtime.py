@@ -81,7 +81,7 @@ def test(addons: list[str], modules: list[str], series: str, image: str | None =
     run_id = secrets.token_hex(4)
     image = image or f"odoo:{series}"
     network = f"om-net-{run_id}"
-    password = secrets.token_urlsafe(16)
+    password = secrets.token_hex(16)  # hex: never starts with "-" (argparse in the image)
     db = f"om_test_{run_id}"
     logs_dir = state_dir(project_root) / "logs"
     logs_dir.mkdir(parents=True, exist_ok=True)
@@ -138,8 +138,8 @@ def serve(addons: list[str], modules: list[str], series: str, image: str | None 
         return {"status": "skipped", "reason": av["reason"]}
     run_id = secrets.token_hex(4)
     image = image or f"odoo:{series}"
-    network, password, db = f"om-net-{run_id}", secrets.token_urlsafe(16), f"om_test_{run_id}"
-    admin_pw = secrets.token_urlsafe(12)
+    network, password, db = f"om-net-{run_id}", secrets.token_hex(16), f"om_test_{run_id}"
+    admin_pw = secrets.token_hex(12)
     _docker("network", "create", "--label", LABEL, network, timeout=60)
     pg = _start_postgres(run_id, pg_image, network, password)
     mount_args, addons_path = _mounts(addons, enterprise)

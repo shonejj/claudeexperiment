@@ -1,0 +1,23 @@
+{
+  "pyright": {
+    "command": "pyright-langserver",
+    "args": ["--stdio"],
+    "extensionToLanguage": { ".py": "python", ".pyi": "python" },
+    "settings": {
+      "python": {
+        "analysis": {
+          "typeCheckingMode": "basic",
+          "diagnosticMode": "openFilesOnly",
+          "diagnosticSeverityOverrides": {
+            "reportMissingImports": "none",
+            "reportMissingModuleSource": "none",
+            "reportAttributeAccessIssue": "none",
+            "reportOptionalMemberAccess": "none"
+          }
+        }
+      }
+    },
+    "startupTimeout": 30000,
+    "maxRestarts": 2
+  }
+}
