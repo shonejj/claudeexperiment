@@ -1,0 +1,41 @@
+schema_version: 1
+name: performance-optimization
+version: 1.0.0
+description: Measure, locate and fix Odoo performance problems (N+1 queries, missing indexes, heavy computes, slow views).
+classification: [performance]
+inputs:
+  request: {required: true}
+  ticket: {}
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake]
+  - id: measure
+    needs: [intake]
+    agent: odoo-database-engineer
+    skills: [odoo-performance, odoo-database-analysis]
+    instructions: Baseline with a reproducible scenario (test with query counts via assertQueryCount, --log-sql on a test db, profiler). No change without a baseline number.
+    outputs: [baseline, hotspots, risk]
+  - id: plan-approval
+    type: approval
+    needs: [measure]
+    auto_approve_when: "ctx.get('risk') == 'low'"
+  - id: optimize
+    needs: [plan-approval]
+    agent: odoo-python-specialist
+    skills: [odoo-performance, implementation]
+  - id: verify
+    needs: [optimize]
+    agent: qa-engineer
+    skills: [odoo-testing, odoo-performance]
+    instructions: Re-measure the same scenario; regression tests pass.
+    evidence: [runtime-test]
+    on_failure: {retry_from: optimize, max_loops: 2}
+  - id: review
+    needs: [verify]
+    agent: code-reviewer
+    skills: [code-review]
+  - id: report
+    needs: [review]
+    agent: documentation-writer
+    skills: [documentation]

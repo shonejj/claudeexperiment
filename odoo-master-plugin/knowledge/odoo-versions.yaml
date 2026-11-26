@@ -1,0 +1,200 @@
+# Odoo version intelligence: the single source of truth used by
+#   scripts/odoo_master/odoo/version.py      (detection fingerprints)
+#   scripts/odoo_master/odoo/migration.py    (rules applied between source and target)
+#   scripts/odoo_master/odoo/validate.py     (version-specific validation)
+# Facts were verified against odoo/documentation (16.0..master) and the source in the official
+# Docker images odoo:17.0, 18.0, 19.0, 20.0 on 2026-11-25. See docs/research/odoo-version-compatibility.md.
+schema_version: 1
+versions:
+  "16.0": {released: "2022-10", standard_support_end: "2025-09", python_min: "3.7", postgres_min: "12", status: extended}
+  "17.0": {released: "2023-11", standard_support_end: "2026-09", python_min: "3.10", postgres_min: "12", status: extended}
+  "18.0": {released: "2024-10", standard_support_end: "2027-09", python_min: "3.10", postgres_min: "13", status: supported}
+  "19.0": {released: "2025-09", standard_support_end: "2028-09", python_min: "3.10", postgres_min: "13", status: supported}
+  "20.0": {released: "2026-09", standard_support_end: "2029-09", python_min: "3.12", postgres_min: "13", status: supported}
+
+# Each rule describes a change that takes effect at `since` (inclusive). A rule is applied by
+# the migration scanner when source < since <= target, and by the validator when the detected
+# version >= since (pattern found = finding). `fingerprint` tells the version detector what a
+# match implies: "<since" (code written for an older version) or ">=since" (newer).
+rules:
+  - id: attrs-states-removed
+    since: "17.0"
+    files: ["*.xml"]
+    pattern: '\s(attrs|states)\s*='
+    severity: error
+    fingerprint: "<since"
+    message: 'View attributes "attrs" and "states" are rejected since 17.0. Use invisible="expr", readonly="expr", required="expr", column_invisible="expr".'
+    doc: "odoo/addons/base/models/ir_ui_view.py (17.0+): 'Since 17.0, the \"attrs\" and \"states\" attributes are no longer used'"
+  - id: init-hook-env
+    since: "17.0"
+    files: ["__init__.py", "hooks.py"]
+    pattern: 'def\s+(pre_init_hook|post_init_hook|uninstall_hook)\s*\(\s*cr\b'
+    severity: error
+    fingerprint: "<since"
+    message: "Install hooks take a single `env` argument since 17.0 (16.0 used cr / cr, registry)."
+    doc: "content/developer/reference/backend/module.rst (17.0)"
+  - id: name-get-deprecated
+    since: "17.0"
+    files: ["*.py"]
+    pattern: 'def\s+name_get\s*\('
+    severity: warning
+    fingerprint: "<since"
+    message: "name_get() is deprecated (SaaS 16.4). Override _compute_display_name and read display_name."
+    doc: "content/developer/reference/backend/orm/changelog.rst (Online 16.4)"
+  - id: tree-to-list
+    since: "18.0"
+    files: ["*.xml", "*.py", "*.js"]
+    pattern: '<tree[\s>/]|view_mode[^\n]{0,40}\btree\b'
+    severity: error
+    fingerprint: "<since"
+    message: 'List views use <list> and view_mode "list" since 18.0 (odoo-bin upgrade_code script 17.5-01-tree-to-list).'
+    doc: "odoo/upgrade_code/17.5-01-tree-to-list.py (18.0+)"
+  - id: list-tag-new
+    since: "18.0"
+    files: ["*.xml"]
+    pattern: '<list[\s>]'
+    severity: info
+    fingerprint: ">=since"
+    message: "<list> view tag (18.0+)."
+    check: false
+  - id: group-operator-renamed
+    since: "18.0"
+    files: ["*.py"]
+    pattern: '\bgroup_operator\s*='
+    severity: warning
+    fingerprint: "<since"
+    message: "Field attribute group_operator was renamed aggregator (SaaS 17.2)."
+    doc: "content/developer/reference/backend/orm/changelog.rst (Online 17.2)"
+  - id: check-access-rights-split
+    since: "18.0"
+    files: ["*.py"]
+    pattern: '\.check_access_rights\(|\.check_access_rule\('
+    severity: warning
+    fingerprint: "<since"
+    message: "Use check_access(operation) / has_access / _filtered_access (18.0), which combine ACLs and rules."
+    doc: "content/developer/reference/backend/orm/changelog.rst (18.0)"
+  - id: sql-constraints-unsupported
+    since: "19.0"
+    files: ["*.py"]
+    pattern: '^\s*_sql_constraints\s*='
+    severity: error
+    fingerprint: "<since"
+    message: "_sql_constraints is ignored since 19.0 (logged as no longer supported): the constraint is silently NOT created. Use `_name_uniq = models.Constraint('UNIQUE(name)', 'message')` or models.Index / models.UniqueIndex."
+    doc: "odoo/orm/model_classes.py:162 (19.0)"
+  - id: models-constraint-new
+    since: "19.0"
+    files: ["*.py"]
+    pattern: 'models\.(Constraint|UniqueIndex|Index)\('
+    severity: info
+    fingerprint: ">=since"
+    message: "models.Constraint / models.Index declarations (18.1+, required from 19.0)."
+    check: false
+  - id: route-json-to-jsonrpc
+    since: "19.0"
+    files: ["*.py"]
+    pattern: '@(http\.)?route\([^)]*type\s*=\s*["\x27]json["\x27]'
+    severity: warning
+    fingerprint: "<since"
+    message: "JSON routes are declared type='jsonrpc' since 19.0 (upgrade_code 18.1-02-route-jsonrpc)."
+    doc: "odoo/upgrade_code/18.1-02-route-jsonrpc.py"
+  - id: route-jsonrpc-new
+    since: "19.0"
+    files: ["*.py"]
+    pattern: 'type\s*=\s*["\x27]jsonrpc["\x27]'
+    severity: info
+    fingerprint: ">=since"
+    message: "type='jsonrpc' routes (19.0+)."
+    check: false
+  - id: users-groups-id-renamed
+    since: "19.0"
+    files: ["*.py", "*.xml", "*.csv"]
+    pattern: '\bgroups_id\b'
+    severity: error
+    fingerprint: "<since"
+    message: "groups_id was renamed group_ids in 19.0 on res.users, ir.ui.menu, ir.ui.view, ir.actions.act_window, ir.actions.server and ir.actions.report. On users, all_group_ids includes implied groups."
+    doc: "odoo/addons/base/models/{res_users,ir_ui_menu,ir_ui_view,ir_actions,ir_actions_report}.py (19.0)"
+  - id: users-group-ids-new
+    since: "19.0"
+    files: ["*.py", "*.xml"]
+    pattern: '\ball_group_ids\b|name=["\x27]group_ids["\x27]'
+    severity: info
+    fingerprint: ">=since"
+    check: false
+    message: "group_ids on res.users (19.0+)."
+  - id: groups-category-to-privilege
+    since: "19.0"
+    files: ["*.xml"]
+    pattern: '<field\s+name=["\x27]category_id["\x27]'
+    severity: warning
+    fingerprint: "<since"
+    message: "res.groups are organised by res.groups.privilege (privilege_id) since 19.0; category_id on groups moved to the privilege. Review group definitions."
+    doc: "odoo/addons/base/models/res_groups.py (19.0)"
+  - id: osv-deprecated
+    since: "19.0"
+    files: ["*.py"]
+    pattern: 'from\s+odoo\.osv\b|odoo\.osv\.expression'
+    severity: warning
+    fingerprint: "<since"
+    message: "odoo.osv is deprecated since 19.0: use odoo.fields.Domain / odoo.Domain."
+    doc: "odoo/osv/__init__.py (19.0)"
+  - id: private-env-shortcuts
+    since: "19.0"
+    files: ["*.py"]
+    pattern: '\bself\._(cr|uid|context)\b'
+    severity: warning
+    fingerprint: "<since"
+    message: "record._cr/_uid/_context are deprecated since 19.0: use self.env.cr, self.env.uid, self.env.context."
+    doc: "content/developer/reference/backend/orm/changelog.rst (19.0)"
+  - id: read-group-public
+    since: "19.0"
+    files: ["*.py"]
+    pattern: '\.read_group\('
+    severity: warning
+    fingerprint: "<since"
+    message: "read_group is deprecated (SaaS 18.2): use _read_group (backend) or formatted_read_group (public API)."
+    doc: "content/developer/reference/backend/orm/changelog.rst (Online 18.2)"
+  - id: acl-csv-replaced
+    since: "20.0"
+    files: ["ir.model.access.csv"]
+    pattern: '.'
+    severity: error
+    fingerprint: "<since"
+    message: "Odoo 20 replaces ir.model.access and ir.rule with ir.access. Rewrite security/ir.model.access.csv as security/ir.access.csv (columns id,name,model_id,group_id/id,operation,domain) and move record-rule domains into it (upgrade_code 19.4-00-ir-access)."
+    doc: "odoo/addons/base/models/ir_access.py (20.0); odoo/upgrade_code/19.4-00-ir-access.py"
+  - id: ir-rule-removed
+    since: "20.0"
+    files: ["*.xml"]
+    pattern: 'model=["\x27]ir\.rule["\x27]'
+    severity: error
+    fingerprint: "<since"
+    message: "ir.rule no longer exists in 20.0: express record restrictions as ir.access records with a domain."
+    doc: "odoo/addons/base/models (20.0: ir_rule.py removed)"
+  - id: ir-access-new
+    since: "20.0"
+    files: ["ir.access.csv"]
+    pattern: '.'
+    severity: info
+    fingerprint: ">=since"
+    check: false
+    message: "ir.access.csv (20.0+)."
+  - id: owl3
+    since: "20.0"
+    files: ["*.js", "*.xml"]
+    pattern: '\buseState\b|\bonWillStart\b|t-component|\bComponent\b.*from\s+["\x27]@odoo/owl["\x27]'
+    severity: warning
+    fingerprint: null
+    message: "Odoo 20 ships OWL 3; run odoo-bin upgrade_code (owl3-migration.py) with --dry-run and review OWL components and templates."
+    doc: "odoo/upgrade_code/owl3-migration.py (20.0)"
+
+# Standard module names commonly depended on; used to tell "unknown dependency" from "standard".
+# This is not exhaustive: when an Odoo source/addons path is available the inventory uses it instead.
+standard_modules: [base, web, mail, contacts, product, uom, account, account_payment, sale, sale_management,
+  sale_stock, purchase, purchase_stock, stock, stock_account, mrp, mrp_account, hr, hr_holidays, hr_expense,
+  hr_timesheet, hr_attendance, project, website, website_sale, portal, point_of_sale, crm, calendar,
+  analytic, payment, delivery, l10n_generic_coa, utm, digest, bus, base_setup, resource, fleet,
+  maintenance, repair, quality, helpdesk, documents, sign, approvals, spreadsheet, web_tour, auth_signup,
+  board, event, survey, lunch, note, im_livechat, website_blog, mass_mailing, sms, iap, base_import,
+  base_automation, barcodes, stock_barcode, account_accountant, web_studio, knowledge, planning, timesheet_grid]
+enterprise_modules: [account_accountant, web_studio, quality, helpdesk, documents, sign, approvals,
+  stock_barcode, knowledge, planning, timesheet_grid, mrp_plm, mrp_workorder, sale_subscription, web_gantt,
+  web_cohort, web_map, account_reports, hr_payroll, social, appointment, voip, marketing_automation]

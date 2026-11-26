@@ -1,0 +1,59 @@
+schema_version: 1
+name: bug-fix
+version: 1.0.0
+description: Reproduce, root-cause, fix and regression-test a defect in an existing Odoo customisation.
+classification: [bug_fix]
+triggers: [interactive, odoo.test.failed]
+inputs:
+  request: {required: true, description: "symptom, error message or traceback"}
+  ticket: {}
+defaults: {timeout_minutes: 60, retries: 1}
+deliverables: [root-cause analysis, failing test then fix, evidence, report]
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake, odoo-version-detection]
+  - id: investigate
+    needs: [intake]
+    agent: odoo-python-specialist
+    skills: [debugging, odoo-project-analysis]
+    instructions: Systematic debugging (skills/debugging) - reproduce (runtime test or failing unit test), locate the responsible module, explain the root cause with file:line evidence. No fix before a root cause.
+    outputs: [root_cause, module, risk, reproduction]
+  - id: fix-approval
+    type: approval
+    needs: [investigate]
+    present: [root_cause, risk]
+    auto_approve_when: "ctx.get('risk') in ('low',)"
+  - id: regression-test
+    needs: [fix-approval]
+    agent: test-automation-engineer
+    skills: [odoo-testing]
+    instructions: Write a test that fails on the current code for the reported behaviour.
+  - id: fix
+    needs: [regression-test]
+    agent: odoo-developer
+    skills: [implementation]
+    outputs: [changed_files, branch]
+  - id: verify
+    needs: [fix]
+    agent: qa-engineer
+    skills: [odoo-testing, evidence-generation]
+    instructions: Static validation, then runtime test (install+upgrade) of the module and its reverse dependencies.
+    evidence: [validation, runtime-test]
+    on_failure: {retry_from: fix, max_loops: 3}
+  - id: review
+    needs: [verify]
+    agent: code-reviewer
+    skills: [code-review]
+    on_failure: {retry_from: fix, max_loops: 2}
+  - id: report
+    needs: [review]
+    agent: documentation-writer
+    skills: [documentation, evidence-generation]
+  - id: ticket-update
+    type: notify
+    needs: [report]
+    when: "inputs.get('ticket')"
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.add_comment

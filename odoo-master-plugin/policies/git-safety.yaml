@@ -1,0 +1,16 @@
+# Git safety: guard.py asks/denies; agents follow.
+deny:
+  - 'git\s+push\s+.*(--force(?!-with-lease)|-f\b)'
+  - 'git\s+push\s+.*--mirror'
+  - 'git\s+filter-branch'
+ask:
+  - 'git\s+push\s+.*--force-with-lease'
+  - 'git\s+reset\s+--hard'
+  - 'git\s+clean\s+-[a-z]*f'
+  - 'git\s+checkout\s+--\s+\.'
+  - 'git\s+branch\s+-D'
+  - 'git\s+(merge|rebase)\s'
+  - 'gh\s+pr\s+merge'
+protected_branches: [main, master, production, release/*]
+branch_naming: "odoo-master/{ticket_or_slug}"
+preserve_unrelated_changes: true

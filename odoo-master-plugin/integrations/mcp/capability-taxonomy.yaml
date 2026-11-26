@@ -1,0 +1,45 @@
+# Capability vocabulary used by workflows (`capability:`), skills and `odoo-master mcp resolve`.
+# Provider profiles (integrations/<provider>/capabilities.yaml) map real MCP tool names to these.
+# access: read | write | destructive  (the registry prefers MCP tool annotations when present)
+capabilities:
+  ticket.search:        {access: read,  description: "search/list tickets (JQL, filters)"}
+  ticket.read:          {access: read,  description: "read one ticket incl. description"}
+  ticket.read_comments: {access: read,  description: "read ticket comments"}
+  ticket.create:        {access: write, description: "create a ticket"}
+  ticket.update:        {access: write, description: "edit ticket fields"}
+  ticket.add_comment:   {access: write, description: "add a comment to a ticket"}
+  ticket.transition:    {access: write, description: "change ticket status"}
+  ticket.list_transitions: {access: read, description: "list allowed status transitions"}
+  ticket.assign:        {access: write, description: "assign a ticket"}
+  ticket.attach:        {access: write, description: "attach a file to a ticket"}
+  ticket.link:          {access: write, description: "link tickets / remote links"}
+  repo.inspect:         {access: read,  description: "repository metadata, files, branches"}
+  repo.read_issue:      {access: read,  description: "read an issue"}
+  repo.create_issue:    {access: write, description: "create an issue"}
+  repo.create_branch:   {access: write, description: "create a branch"}
+  repo.read_pull_request: {access: read, description: "read PR, diff, files"}
+  repo.create_pull_request: {access: write, description: "open a pull request"}
+  repo.update_pull_request: {access: write, description: "update a pull request"}
+  repo.inspect_checks:  {access: read,  description: "CI checks / workflow runs / job logs"}
+  repo.add_comment:     {access: write, description: "comment on issue/PR or review"}
+  repo.merge:           {access: destructive, description: "merge a pull request (always human)"}
+  chat.search:          {access: read,  description: "search messages"}
+  chat.read_thread:     {access: read,  description: "read a message thread / channel history"}
+  chat.send_message:    {access: write, description: "post a new message"}
+  chat.reply_thread:    {access: write, description: "reply in a thread"}
+  chat.react:           {access: write, description: "add a reaction"}
+  docs.search:          {access: read,  description: "search documents/pages"}
+  docs.read:            {access: read,  description: "read a document/page"}
+  docs.write:           {access: write, description: "create/update a document/page"}
+  db.query:             {access: read,  description: "run SQL (treated as read only if the server is read-only)"}
+  db.schema:            {access: read,  description: "inspect schema"}
+  browser.navigate:     {access: read,  description: "browser automation: navigate/snapshot"}
+  browser.interact:     {access: write, description: "browser automation: click/type"}
+  browser.screenshot:   {access: read,  description: "capture screenshot"}
+  deploy.read:          {access: read,  description: "deployment/monitoring status"}
+  deploy.execute:       {access: destructive, description: "trigger deployments (always human)"}
+  odoo.analyze:         {access: read,  description: "odoo-master project intelligence (bundled server)"}
+generic_verbs:          # fallback classification by tool-name verbs
+  read: [get, list, search, find, read, fetch, query, lookup, view, describe, show, inspect, retrieve, download, status]
+  write: [create, add, post, send, reply, update, edit, set, transition, assign, comment, upload, attach, move, label, react, write, insert, run, trigger, invite]
+  destructive: [delete, remove, drop, purge, destroy, merge, close, archive, revoke, truncate, force, reset]

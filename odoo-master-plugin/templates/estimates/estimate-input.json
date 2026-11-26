@@ -1,0 +1,9 @@
+{
+  "title": "{{title}}",
+  "ticket": "{{ticket}}",
+  "confidence": "medium",
+  "tasks": [
+    {"id": "T1", "title": "describe the task", "module": "module_name", "kind": "model", "complexity": "moderate",
+     "unknowns": 0, "new_module": false, "touches_standard_flow": false, "data_migration": false}
+  ]
+}

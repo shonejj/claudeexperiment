@@ -1,0 +1,14 @@
+# Security policy: applied by hooks (scripts/odoo_master/hooks/guard.py) and followed by agents.
+# Hooks are a guard-rail, not a security boundary: the boundary is Claude Code permissions,
+# managed settings and the infrastructure (credentials scoped to dev/test). See docs/security.md.
+secrets:
+  never_print_files: [".env", "*.pem", "*.key", "id_rsa*", "*.p12", ".pgpass", "odoo.conf"]   # read for structure only via odoo-master (redacted)
+  block_commit_patterns: ['(?i)(password|passwd|secret|api[_-]?key|token)\s*[:=]\s*[^\s]{6,}', 'ghp_[A-Za-z0-9]{30,}', 'xox[abprs]-']
+  redact_in_reports: true
+protected_paths:
+  # Never modify Odoo core / Enterprise source. Paths are matched against the file being edited.
+  ask: ["odoo/addons/**", "odoo/odoo/**", "**/odoo/addons/base/**", "enterprise/**", "**/site-packages/odoo/**", "**/dist-packages/odoo/**"]
+  deny: [".git/**"]
+data_privacy:
+  allow_production_data_in_reports: false
+  public_channels_get_summary_only: true

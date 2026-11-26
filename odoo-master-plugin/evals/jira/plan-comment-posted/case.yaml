@@ -1,0 +1,30 @@
+schema_version: "1.1"
+name: plan-comment-posted
+description: Scenario C (interactive part) — read ticket via Jira MCP (mocked), plan, post the plan to the SAME ticket
+tags: [jira, mcp, scenario-c]
+runs: 2
+execution:
+  prompt: "Find the Jira ticket assigned to me about Odoo inventory errors, analyse it against this repository and post a technical plan as a comment on that ticket. You are authorised to post the comment."
+  max_turns: 30
+  timeout_seconds: 1200
+  allowed_tools: [Read, Glob, Grep, Bash, Skill, Write, "mcp__atlassian__*"]
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: searched
+    type: tool_used
+    tool: mcp__atlassian__searchJiraIssuesUsingJql
+  - name: commented-on-same-ticket
+    type: tool_used
+    tool: mcp__atlassian__addCommentToJiraIssue
+    input_match: "INV-42"
+  - name: never-other-ticket
+    type: tool_used
+    tool: mcp__atlassian__addCommentToJiraIssue
+    input_match: "INV-7"
+    min: 0
+    max: 0
+  - name: order
+    type: tool_order
+    before: mcp__atlassian__getJiraIssue
+    after: mcp__atlassian__addCommentToJiraIssue

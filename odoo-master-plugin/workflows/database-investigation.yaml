@@ -1,0 +1,43 @@
+schema_version: 1
+name: database-investigation
+version: 1.0.0
+description: Investigate a PostgreSQL/ORM issue (data inconsistency, constraint errors, locks, missing columns) read-only, then propose a safe remediation.
+classification: [database_investigation]
+triggers: [interactive]
+inputs:
+  request: {required: true}
+  dsn_env: {description: name of the environment that holds the libpq connection (never the password itself)}
+  ticket: {}
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake]
+  - id: access-approval
+    type: approval
+    needs: [intake]
+    instructions: Confirm which database may be inspected (non-production preferred) and that read-only inspection is authorised.
+    auto_approve_when: "not ctx.get('production', True)"
+  - id: inspect
+    needs: [access-approval]
+    agent: odoo-database-engineer
+    skills: [odoo-database-analysis]
+    instructions: odoo-master db overview / db model --model <m>; correlate with code (fields without columns, orphan columns, constraints).
+    evidence: [database-check]
+    outputs: [findings, risk]
+  - id: remediation-plan
+    needs: [inspect]
+    agent: odoo-database-engineer
+    skills: [odoo-database-analysis, odoo-migration]
+    instructions: Prefer ORM/upgrade-script remediation over manual SQL. Include backup, validation and rollback.
+  - id: remediation-approval
+    type: approval
+    needs: [remediation-plan]
+    always_human: true
+  - id: review
+    needs: [remediation-approval]
+    agent: database-reviewer
+    skills: [odoo-database-analysis]
+  - id: report
+    needs: [review]
+    agent: documentation-writer
+    skills: [documentation]

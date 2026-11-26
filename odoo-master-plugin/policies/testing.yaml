@@ -1,0 +1,14 @@
+# Testing policy: the Stop-hook quality gate and QA agents follow it.
+quality_gate:
+  enabled: true
+  block_on: [error]               # static validation severities that block finishing
+  max_blocks_per_session: 3        # then report instead of blocking (avoid loops)
+required_levels:
+  bug_fix: [static, runtime]
+  new_module: [static, runtime]
+  module_enhancement: [static, runtime]
+  migration: [static, runtime, database]
+  ui_change: [static, runtime, browser]
+  general_software: [static, unit]
+zero_tests_is_failure: true        # "0 tests ran" never counts as passed
+never_use_production_for_tests: true

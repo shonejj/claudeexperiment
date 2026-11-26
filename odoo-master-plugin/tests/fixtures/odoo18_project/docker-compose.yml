@@ -1,0 +1,7 @@
+services:
+  db:
+    image: postgres:16
+  odoo:
+    image: odoo:18.0
+    volumes:
+      - ./addons:/mnt/extra-addons

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "odoo-master/evidence.schema.json",
+  "title": "Evidence manifest",
+  "type": "object",
+  "required": [
+    "execution",
+    "items",
+    "generated_at"
+  ],
+  "properties": {
+    "execution": {
+      "type": "string"
+    },
+    "ticket": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "level",
+          "status",
+          "recorded_at"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "validation",
+              "unit-test",
+              "integration-test",
+              "runtime-test",
+              "database-check",
+              "browser-check",
+              "screenshot",
+              "review",
+              "migration-check",
+              "log-summary",
+              "report",
+              "command",
+              "other"
+            ]
+          },
+          "level": {
+            "enum": [
+              "static",
+              "unit",
+              "integration",
+              "runtime",
+              "database",
+              "browser",
+              "production"
+            ]
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "skipped",
+              "passed_no_tests",
+              "info"
+            ]
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sha256": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recorded_at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "levels_achieved": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "levels_missing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

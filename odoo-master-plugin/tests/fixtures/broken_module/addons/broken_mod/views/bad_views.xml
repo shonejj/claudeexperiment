@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="sale_view_inherit" model="ir.ui.view">
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="sideways">
+                <field name="name" attrs="{'readonly': True}"/>
+            </xpath>
+        </field>
+    </record>
+    <menuitem id="m1" action="crm.crm_lead_action"/>

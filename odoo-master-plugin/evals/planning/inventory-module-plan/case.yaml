@@ -1,0 +1,25 @@
+schema_version: "1.1"
+name: inventory-module-plan
+description: Scenario A — analyse the repo and plan how to implement a custom inventory feature with an estimate; ask for approval before coding
+tags: [planning, scenario-a]
+runs: 2
+execution:
+  prompt: "Analyze this project and identify how to implement lot-level quality checks on incoming receipts. Give me a plan and an estimate. Don't implement yet."
+  max_turns: 25
+  timeout_seconds: 1200
+  allowed_tools: [Read, Glob, Grep, Bash, Skill, Write]
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: used-estimator
+    type: tool_used
+    tool: Bash
+    input_match: "odoo-master.*estimate"
+  - name: no-code-written
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: plan-quality
+    type: llm
+    criteria: "The plan reuses/extends the existing stock_quality_check module instead of creating an unrelated new module, references stock.picking / stock.move.line or stock.lot correctly, covers security (ACL), views, tests and database impact, gives an effort range described as an estimate (not a commitment), and asks for approval before implementing."

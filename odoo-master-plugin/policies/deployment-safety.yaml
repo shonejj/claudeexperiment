@@ -1,0 +1,10 @@
+deploy_requires:
+  - approval record (always_human)
+  - backup evidence younger than 24h for production
+  - staging upgrade run with clean log summary
+  - rollback command recorded
+deny_without_approval:
+  - 'docker\s+compose\s+.*(down\s+-v|rm\s+-v)'
+  - 'docker\s+volume\s+rm'
+  - 'kubectl\s+(delete|apply).*prod'
+  - 'odoo(-bin)?\s+.*-u\s+all'

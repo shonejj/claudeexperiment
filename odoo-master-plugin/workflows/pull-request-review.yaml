@@ -1,0 +1,46 @@
+schema_version: 1
+name: pull-request-review
+version: 1.0.0
+description: Review an existing pull request with Odoo-aware checks (version rules, ACLs, migrations, tests, CI) and report findings.
+classification: [pull_request_review]
+triggers: [interactive, github.pull_request.opened, github.pull_request.updated]
+inputs:
+  pull_request: {required: true, description: owner/repo#number or URL}
+steps:
+  - id: fetch
+    agent: github-agent
+    skills: [github-management, pull-request-review]
+    capability: repo.read_pull_request
+    instructions: Diff, changed files, CI checks, linked issue.
+  - id: static
+    needs: [fetch]
+    agent: qa-engineer
+    skills: [odoo-testing]
+    instructions: Check out the PR head in a worktree; odoo-master validate --files <changed files>.
+    evidence: [validation]
+  - id: code-review
+    needs: [static]
+    agent: code-reviewer
+    skills: [pull-request-review, code-review]
+    parallel_group: review
+  - id: security-review
+    needs: [static]
+    agent: odoo-security-specialist
+    skills: [odoo-security]
+    parallel_group: review
+  - id: db-review
+    needs: [static]
+    when: "ctx.get('fetch', {}).get('touches_models', True)"
+    agent: database-reviewer
+    skills: [odoo-database-analysis]
+    parallel_group: review
+  - id: post-approval
+    type: approval
+    needs: [code-review, security-review, db-review]
+    instructions: Show the review before posting it on the PR.
+  - id: post-review
+    type: notify
+    needs: [post-approval]
+    agent: github-agent
+    skills: [github-management]
+    capability: repo.add_comment

@@ -1,0 +1,11 @@
+provider: slack
+description: Slack via an MCP server (official Slack MCP or community servers).
+server_patterns: ['slack']
+tools:
+  - {match: '(search_messages|search)', capabilities: [chat.search]}
+  - {match: '(get_thread_replies|conversations_replies|read_thread|get_channel_history|conversations_history|read_channel)', capabilities: [chat.read_thread]}
+  - {match: '(reply_to_thread|reply)', capabilities: [chat.reply_thread]}
+  - {match: '(post_message|send_message|chat_post)', capabilities: [chat.send_message, chat.reply_thread]}
+  - {match: '(add_reaction|reaction)', capabilities: [chat.react]}
+event_mechanisms:
+  - Slack Events API (message.channels / app_mention) -> /events/slack (X-Slack-Signature v0, url_verification challenge)

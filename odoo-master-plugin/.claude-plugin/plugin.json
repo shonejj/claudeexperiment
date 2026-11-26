@@ -1,0 +1,33 @@
+{
+  "name": "odoo-master",
+  "displayName": "Odoo Master",
+  "version": "0.1.0",
+  "description": "Agentic Odoo ERP engineering for Claude Code: version-aware Odoo 16-20 expert agents, project intelligence, validators, runtime testing in Docker, migrations, database safety, MCP capability discovery, Jira/GitHub/Slack ticket lifecycle, workflow engine with approval gates, evidence and PDF reports.",
+  "author": { "name": "shonejj", "url": "https://github.com/shonejj" },
+  "homepage": "https://github.com/shonejj/claudeexperiment",
+  "repository": "https://github.com/shonejj/claudeexperiment",
+  "license": "MIT",
+  "keywords": ["odoo", "erp", "agents", "migration", "postgresql", "mcp", "jira", "workflow", "qa"],
+  "workflows": ["./claude-workflows/odoo-parallel-review.js"],
+  "userConfig": {
+    "autonomy": {
+      "type": "string",
+      "title": "Autonomy mode",
+      "description": "checkpoint: stop for human approval at every approval gate in a workflow. autonomous: auto-approve gates whose risk is at or below the policy threshold (high-risk and production gates always stop).",
+      "default": "checkpoint",
+      "options": ["checkpoint", "autonomous"]
+    },
+    "production_patterns": {
+      "type": "string",
+      "title": "Production name patterns",
+      "description": "Comma-separated regular expressions. Database names, hosts or Odoo URLs matching any of them are treated as production by the guard hook and database tools.",
+      "default": "prod,production,live"
+    },
+    "default_odoo_version": {
+      "type": "string",
+      "title": "Fallback Odoo version",
+      "description": "Used only when no version can be detected from the project. Leave empty to require detection or an explicit answer.",
+      "default": ""
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Database safety: enforced by guard.py on Bash commands and by odoo_master.odoo.db.
+environments:
+  production_patterns_from_config: true       # uses config production_patterns
+  test_database_prefix: om_test_
+read_only_inspection:
+  default: allowed_non_production
+  production: requires_approval              # odoo-master db ... --allow-production-readonly
+blocked_without_approval:                   # guard.py -> "ask" (interactive) / deny (non-interactive)
+  - 'DROP\s+(DATABASE|TABLE|SCHEMA)'
+  - 'TRUNCATE\b'
+  - 'DELETE\s+FROM\s+\w+\s*(;|$)'            # DELETE without WHERE
+  - 'UPDATE\s+\w+\s+SET\s+[^;]*?(;|$)(?![\s\S]*WHERE)'
+  - 'ALTER\s+TABLE\s+\S+\s+DROP'
+  - '\bdropdb\b'
+  - 'odoo(-bin)?\s+db\s+drop'
+  - 'odoo(-bin)?\s+neutralize'                # irreversible on the target database
+always_production_check: ['-d\s+(\S+)', '--database[= ](\S+)', 'psql\s+.*?(\S+)$']
+before_migration:
+  - backup (pg_dump + filestore) exists and is recorded in evidence with sha256
+  - migration plan approved
+  - tested on a neutralized copy

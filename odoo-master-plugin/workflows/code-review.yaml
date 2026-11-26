@@ -1,0 +1,26 @@
+schema_version: 1
+name: code-review
+version: 1.0.0
+description: Independent review of local changes (working tree or branch diff) with Odoo static validation and two verdicts (spec compliance, quality).
+classification: [code_review]
+inputs:
+  base: {default: HEAD, description: base ref for the diff}
+steps:
+  - id: static
+    agent: qa-engineer
+    skills: [odoo-testing]
+    evidence: [validation]
+  - id: review
+    needs: [static]
+    agent: code-reviewer
+    skills: [code-review]
+    parallel_group: review
+  - id: security
+    needs: [static]
+    agent: odoo-security-specialist
+    skills: [odoo-security]
+    parallel_group: review
+  - id: summary
+    needs: [review, security]
+    agent: documentation-writer
+    skills: [documentation]

@@ -1,0 +1,16 @@
+schema_version: "1.1"
+name: version-conflict
+description: Conflicting version signals must lead to a question, not a guess
+tags: [project-analysis, version]
+runs: 3
+execution:
+  prompt: "Add a 'priority' selection field to broken.thing and show it in a view."
+  max_turns: 12
+  timeout_seconds: 600
+  allowed_tools: [Read, Glob, Grep, Bash, Skill]
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: asks-about-version
+    type: llm
+    criteria: "Before writing view code, the assistant points out that the module's manifest says 18.0 while the views still use the pre-17 'attrs' syntax (conflicting version signals) and asks which Odoo version is targeted (or explicitly states the assumption and why). It does not silently write attrs-based or list-based XML without addressing the conflict."

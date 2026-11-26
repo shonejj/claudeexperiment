@@ -1,0 +1,22 @@
+schema_version: "1.1"
+name: existing-repo-analysis
+description: Scenario A (part) — analyse an existing Odoo repository without assuming it is new
+tags: [project-analysis, scenario-a]
+runs: 3
+execution:
+  prompt: "Analyze this Odoo project. Which Odoo version is it, which custom modules exist, which standard models do they extend, and what can you NOT know without the database?"
+  max_turns: 15
+  timeout_seconds: 600
+  allowed_tools: [Read, Glob, Grep, Bash, Skill]
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: cites-evidence
+    type: regex
+    pattern: "[\\w/.-]+\\.(py|xml|yml|yaml|csv)(:\\d+)?|Dockerfile"
+  - name: reports-version
+    type: regex
+    pattern: "16\\.0"
+  - name: quality
+    type: llm
+    criteria: "The answer identifies Odoo 16.0, the custom module sale_discount_approval extending sale.order (defined by the standard 'sale' module), the new model sale.discount.request, and states that installed modules/data/real schema cannot be verified without a database connection."

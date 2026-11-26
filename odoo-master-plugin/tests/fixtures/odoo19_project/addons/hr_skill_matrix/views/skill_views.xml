@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_skill_matrix_level_view_list" model="ir.ui.view">
+        <field name="name">hr.skill.matrix.level.list</field>
+        <field name="model">hr.skill.matrix.level</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="employee_id"/>
+            </list>
+        </field>
+    </record>
+    <menuitem id="hr_skill_matrix_menu" name="Skill Matrix" parent="hr.menu_hr_root" groups="hr.group_hr_user"/>
+</odoo>

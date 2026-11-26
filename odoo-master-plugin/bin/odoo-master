@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Odoo Master CLI wrapper. Claude Code adds the plugin's bin/ to PATH while the plugin is enabled.
+set -euo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HERE}"
+PY="${ODOO_MASTER_PYTHON:-$(command -v python3 || command -v python)}"
+exec env PYTHONPATH="$HERE/scripts${PYTHONPATH:+:$PYTHONPATH}" "$PY" -m odoo_master.cli "$@"

@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "odoo-master/config.schema.json",
+  "title": "Odoo Master configuration (plugin defaults, org file, .odoo-master/config.yaml)",
+  "type": "object",
+  "properties": {
+    "autonomy": {
+      "enum": [
+        "checkpoint",
+        "autonomous"
+      ]
+    },
+    "production_patterns": {
+      "type": [
+        "array",
+        "string"
+      ]
+    },
+    "default_odoo_version": {
+      "type": "string"
+    },
+    "agents": {
+      "type": "object",
+      "properties": {
+        "disabled": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "optional_enabled": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "workflows": {
+      "type": "object",
+      "properties": {
+        "default_for_intent": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string"
+        },
+        "postgres_image": {
+          "type": "string"
+        },
+        "enterprise_path": {
+          "type": "string"
+        },
+        "addons_paths": {
+          "type": "array"
+        }
+      }
+    },
+    "reports": {
+      "type": "object",
+      "properties": {
+        "formats": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "md",
+              "html",
+              "pdf"
+            ]
+          }
+        },
+        "output_dir": {
+          "type": "string"
+        }
+      }
+    },
+    "integrations": {
+      "type": "object"
+    },
+    "policies": {
+      "type": "object"
+    },
+    "instructions": {
+      "type": "object",
+      "properties": {
+        "extra_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "estimation": {
+      "type": "object"
+    }
+  }
+}

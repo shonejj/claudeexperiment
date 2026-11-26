@@ -1,0 +1,12 @@
+{
+  "name": "odoo-master",
+  "description": "Odoo Master: an agentic Odoo ERP engineering team for Claude Code",
+  "owner": { "name": "shonejj", "url": "https://github.com/shonejj" },
+  "plugins": [
+    {
+      "name": "odoo-master",
+      "source": "./odoo-master-plugin",
+      "description": "Senior Odoo engineering agents, skills, hooks, workflows, MCP capability discovery, ticket lifecycle, testing and evidence for Odoo 16-20 projects."
+    }
+  ]
+}

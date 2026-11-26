@@ -1,0 +1,17 @@
+provider: github
+description: GitHub via the official GitHub MCP server (or gh CLI fallback in skills).
+server_patterns: ['github']
+tools:
+  - {match: '(get_file_contents|list_branches|list_commits|get_commit|search_code|get_repository)', capabilities: [repo.inspect]}
+  - {match: '(issue_read|get_issue|list_issues|search_issues)', capabilities: [repo.read_issue]}
+  - {match: '(issue_write|create_issue)', capabilities: [repo.create_issue]}
+  - {match: 'create_branch', capabilities: [repo.create_branch]}
+  - {match: '(pull_request_read|get_pull_request|list_pull_requests)', capabilities: [repo.read_pull_request]}
+  - {match: 'create_pull_request', capabilities: [repo.create_pull_request]}
+  - {match: '(update_pull_request)', capabilities: [repo.update_pull_request]}
+  - {match: '(check_run|actions_list|actions_get|get_job_logs|workflow_run)', capabilities: [repo.inspect_checks]}
+  - {match: '(add_issue_comment|add_comment_to_pending_review|pull_request_review_write|add_reply_to_pull_request_comment)', capabilities: [repo.add_comment]}
+  - {match: 'merge_pull_request', capabilities: [repo.merge], access: destructive}
+event_mechanisms:
+  - GitHub repository/organisation webhook (issues, pull_request, check_suite) with secret -> /events/github (X-Hub-Signature-256)
+  - GitHub Actions workflow calling the receiver or running `claude -p`

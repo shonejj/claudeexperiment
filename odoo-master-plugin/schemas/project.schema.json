@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "odoo-master/project.schema.json",
+  "title": ".odoo-master/project-inventory.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "root",
+    "odoo",
+    "summary",
+    "knowledge_limits"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "root": {
+      "type": "string"
+    },
+    "git": {
+      "type": "object"
+    },
+    "environment": {
+      "type": "object"
+    },
+    "odoo": {
+      "type": "object",
+      "required": [
+        "version",
+        "confidence",
+        "addons_paths"
+      ],
+      "properties": {
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "none"
+          ]
+        },
+        "addons_paths": {
+          "type": "array"
+        },
+        "core_in_repo": {
+          "type": "boolean"
+        }
+      }
+    },
+    "summary": {
+      "type": "object"
+    },
+    "modules": {
+      "type": "object"
+    },
+    "findings": {
+      "type": "object"
+    },
+    "knowledge_limits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+# Plugin defaults. Override per project in .odoo-master/config.yaml (validated by schemas/config.schema.json)
+# or per organisation with ODOO_MASTER_ORG_CONFIG=/path/org.yaml. See docs/configuration.md.
+autonomy: checkpoint            # checkpoint | autonomous (plugin option "autonomy")
+production_patterns: [prod, production, live]
+default_odoo_version: ""
+agents:
+  disabled: []                  # e.g. [ui-ux-designer]
+  optional_enabled: []
+workflows:
+  default_for_intent:
+    new_module: new-odoo-module
+    module_enhancement: existing-module-enhancement
+    bug_fix: bug-fix
+    migration: odoo-migration
+    database_investigation: database-investigation
+    performance: performance-optimization
+    security_audit: security-audit
+    deployment: deployment
+    ticket_planning: jira-ticket-planning
+    ticket_implementation: jira-ticket-development
+    github_issue: github-issue-development
+    pull_request_review: pull-request-review
+    code_review: code-review
+    slack_report: slack-issue-investigation
+    general_software: general-development
+runtime:
+  image: ""                     # default odoo:<detected series>
+  postgres_image: postgres:16
+  enterprise_path: ""           # path to an Enterprise addons checkout, mounted read-only
+  addons_paths: []              # default: every directory that contains custom modules
+reports:
+  formats: [md, html, pdf]
+  output_dir: .odoo-master/reports
+estimation:
+  hours_per_complexity: {trivial: 0.5, simple: 2, moderate: 6, complex: 16, very_complex: 32}
+  multipliers: {new_module: 1.15, touches_standard_flow: 1.3, data_migration: 1.4, per_unknown: 0.15}
+  overhead: {testing: 0.30, review: 0.10, documentation: 0.05}
+  hours_per_day: 6
+integrations:
+  ticket_providers_priority: [jira, linear, github]
+  chat_providers_priority: [slack]
+instructions:
+  extra_files: []               # project-specific instruction files to load (relative to project root)

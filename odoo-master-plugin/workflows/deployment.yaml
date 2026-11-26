@@ -1,0 +1,36 @@
+schema_version: 1
+name: deployment
+version: 1.0.0
+description: Prepare (never perform unapproved) an Odoo deployment - module upgrade list, config review, backup evidence, staging run, rollback.
+classification: [deployment]
+triggers: [interactive, odoo.deployment.requested]
+inputs:
+  environment: {required: true, description: staging | production | other}
+  modules: {}
+  ticket: {}
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake]
+  - id: prepare
+    needs: [intake]
+    agent: devops-engineer
+    skills: [odoo-deployment]
+    instructions: Changed modules + reverse dependencies -> -u list; review odoo.conf (workers, proxy_mode, dbfilter, list_db, gevent port); backup procedure; rollback command.
+    outputs: [upgrade_list, rollback, risk]
+  - id: staging-run
+    needs: [prepare]
+    agent: devops-engineer
+    skills: [odoo-deployment, odoo-testing]
+    instructions: Upgrade on staging or the ephemeral runtime; log summary must be clean.
+    evidence: [runtime-test, log-summary]
+  - id: deploy-approval
+    type: approval
+    needs: [staging-run]
+    always_human: true
+    present: [upgrade_list, rollback, risk]
+  - id: handover
+    needs: [deploy-approval]
+    agent: documentation-writer
+    skills: [documentation]
+    instructions: Runbook for the human operator (commands, order, checks, rollback). The plugin does not execute production deployments.

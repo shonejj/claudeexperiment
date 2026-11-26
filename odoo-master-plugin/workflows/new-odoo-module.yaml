@@ -1,0 +1,107 @@
+schema_version: 1
+name: new-odoo-module
+version: 1.0.0
+description: Build a new custom Odoo module only after confirming no standard feature or existing custom module can be extended instead.
+classification: [new_module]
+triggers: [interactive, odoo.module.development.requested]
+inputs:
+  request: {required: true, description: natural-language requirement}
+  ticket: {description: "originating ticket key, if any"}
+defaults: {timeout_minutes: 90, retries: 1}
+deliverables: [requirements.md, technical-spec.md, estimate, module code with tests, validation + runtime evidence, development report (md+pdf)]
+steps:
+  - id: intake
+    agent: project-analyst
+    skills: [project-intake, odoo-project-analysis, odoo-version-detection]
+    instructions: Run `odoo-master analyze --brief`; read .odoo-master/project-context.md; confirm the target Odoo version (stop on conflicts).
+    outputs: [odoo_version, addons_path]
+  - id: requirements
+    needs: [intake]
+    agent: requirements-analyst
+    skills: [requirements-analysis]
+    instructions: Produce requirements + acceptance criteria from templates/requirements; list open questions; set risk.
+    outputs: [acceptance_criteria, open_questions, risk]
+  - id: reuse-check
+    needs: [requirements]
+    agent: odoo-architect
+    skills: [architecture-planning, odoo-module-development]
+    instructions: Apply the Odoo reuse ladder (instructions/odoo-development.md). Use knowledge/standard-modules/models-<ver>.json and the inventory. If an existing module should be extended, output decision=extend and stop proposing a new module.
+    outputs: [decision, target_module, standard_dependencies]
+  - id: design
+    needs: [reuse-check]
+    agent: odoo-architect
+    skills: [architecture-planning, odoo-model-development, odoo-view-development, odoo-security, wireframing]
+    instructions: Technical spec - models/fields, views (with xpath targets), security groups/ACL/rules, data, tests; module impact + database impact. Mermaid diagram.
+    outputs: [technical_spec_path]
+  - id: estimate
+    needs: [design]
+    agent: solution-architect
+    skills: [estimation]
+    instructions: Build the estimate input from the spec and run `odoo-master estimate`.
+    outputs: [estimate_path]
+  - id: plan-approval
+    type: approval
+    needs: [estimate]
+    approvers: [requester]
+    present: [requirements, technical_spec_path, estimate_path, risk]
+    instructions: Present plan, estimate, risks and open questions. Do not write module code before approval.
+    on_reject: design
+  - id: scaffold-and-implement
+    needs: [plan-approval]
+    agent: odoo-developer
+    skills: [implementation, odoo-module-development, odoo-model-development, odoo-view-development, odoo-security]
+    instructions: Create the module in the detected addons path on a feature branch; follow version rules; write tests first for business logic.
+    outputs: [module, branch]
+    timeout_minutes: 180
+  - id: frontend
+    needs: [scaffold-and-implement]
+    when: "ctx.get('design', {}).get('needs_owl', False)"
+    agent: odoo-owl-specialist
+    skills: [odoo-owl-development]
+    parallel_group: build
+  - id: static-validation
+    needs: [scaffold-and-implement, frontend]
+    agent: qa-engineer
+    skills: [odoo-testing, evidence-generation]
+    instructions: odoo-master validate --modules <module>; 0 errors required.
+    evidence: [validation]
+    on_failure: {retry_from: scaffold-and-implement, max_loops: 3}
+  - id: runtime-tests
+    needs: [static-validation]
+    agent: test-automation-engineer
+    skills: [odoo-testing, evidence-generation]
+    instructions: odoo-master runtime test --modules <module> (install + upgrade pass). 0 tests ran = failure. If Docker is unavailable record level runtime as missing.
+    evidence: [runtime-test]
+    on_failure: {retry_from: scaffold-and-implement, max_loops: 3}
+  - id: visual-qa
+    needs: [runtime-tests]
+    when: "ctx.get('design', {}).get('ui_change', True)"
+    agent: visual-qa-engineer
+    skills: [visual-qa]
+    evidence: [browser-check, screenshot]
+    on_failure: continue
+  - id: review
+    needs: [runtime-tests]
+    agent: code-reviewer
+    skills: [code-review]
+    parallel_group: review
+    on_failure: {retry_from: scaffold-and-implement, max_loops: 2}
+  - id: security-review
+    needs: [runtime-tests]
+    agent: odoo-security-specialist
+    skills: [odoo-security]
+    parallel_group: review
+    on_failure: {retry_from: scaffold-and-implement, max_loops: 2}
+  - id: report
+    needs: [review, security-review, visual-qa]
+    agent: documentation-writer
+    skills: [documentation, evidence-generation]
+    instructions: Development report from templates/reports/development-report.md; odoo-master report render; evidence verify.
+    outputs: [report_path]
+  - id: ticket-update
+    type: notify
+    needs: [report]
+    when: "inputs.get('ticket')"
+    agent: jira-agent
+    skills: [jira-management]
+    capability: ticket.add_comment

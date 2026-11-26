@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "odoo-master/report.schema.json",
+  "title": "Report metadata (frontmatter of generated reports)",
+  "type": "object",
+  "required": [
+    "title",
+    "kind",
+    "generated_at"
+  ],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "requirements",
+        "functional-spec",
+        "technical-spec",
+        "architecture",
+        "module-impact",
+        "database-impact",
+        "migration-plan",
+        "implementation-plan",
+        "estimate",
+        "risk",
+        "test-plan",
+        "development-report",
+        "evidence",
+        "review"
+      ]
+    },
+    "ticket": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "execution": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "odoo_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "verification_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

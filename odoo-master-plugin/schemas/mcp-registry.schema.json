@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "odoo-master/mcp-registry.schema.json",
+  "title": ".odoo-master/mcp-registry.json",
+  "type": "object",
+  "required": [
+    "updated_at",
+    "servers"
+  ],
+  "properties": {
+    "updated_at": {
+      "type": "string"
+    },
+    "servers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "connected",
+              "needs_auth",
+              "failed",
+              "unknown",
+              "configured"
+            ]
+          },
+          "source": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "qualified_name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "capabilities": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "access": {
+                  "enum": [
+                    "read",
+                    "write",
+                    "destructive",
+                    "unknown"
+                  ]
+                },
+                "input_required": {
+                  "type": "array"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
