@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import re
 
-from ..util import append_jsonl, now_iso, read_json, state_dir, write_json
+from ..util import PLUGIN_ROOT, append_jsonl, now_iso, read_json, state_dir, write_json
 from . import changed_files, out, project_root, safe_main, session_dir
 
 STATUS_RE = re.compile(r"STATUS:\s*(DONE_WITH_CONCERNS|DONE|NEEDS_CONTEXT|BLOCKED)\b")
@@ -42,7 +42,7 @@ def subagent_start(payload: dict) -> int:
              f"- Project root: {root}; Odoo series: {ver.get('version') or 'unknown'} (confidence {ver.get('confidence')})"
              + ("; CONFLICTING version signals — confirm before writing version-specific code" if ver.get("conflicts") else ""),
              "- Read ${CLAUDE_PLUGIN_ROOT}/instructions/global.md first; project facts in .odoo-master/project-context.md.",
-             "- CLI: `odoo-master` (validate, runtime test, source grep/show, lookup, migration, evidence add).",
+             f"- CLI: {PLUGIN_ROOT}/bin/odoo-master (absolute path; validate, runtime test, source grep/show, lookup, migration, scaffold, evidence add).",
              "- End with `STATUS: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED`, then your structured output; cite path:line."]
     for e in act[:3]:
         lines.append(f"- Active execution {e['id']} ({e['workflow']}, ticket {e['ticket']}), running steps: {', '.join(e['running']) or '-'}")

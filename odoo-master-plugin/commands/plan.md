@@ -3,8 +3,11 @@ description: "Plan a change without implementing it: requirements, reuse decisio
 argument-hint: "<what to build or change>"
 allowed-tools:
   - "Bash(odoo-master *)"
+  - "Bash(${CLAUDE_PLUGIN_ROOT}/bin/odoo-master *)"
 disable-model-invocation: true
 ---
+
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
 
 Request: $ARGUMENTS
 

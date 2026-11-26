@@ -101,6 +101,11 @@
     },
     "estimation": {
       "type": "object"
+    },
+    "confirmed_odoo_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.0$",
+      "description": "series confirmed by the user; resolves conflicting version signals"
     }
   }
 }

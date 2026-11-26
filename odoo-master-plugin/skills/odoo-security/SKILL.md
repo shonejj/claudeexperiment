@@ -3,6 +3,8 @@ name: odoo-security
 description: "Odoo access control and application security: groups and privileges, ACL CSV formats (ir.model.access up to 19, ir.access in 20), record rules and multi-company domains, field groups, sudo/with_user, public routes, SQL injection, secrets. Use when creating models, changing access, or reviewing security."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Odoo security
 
 ## ACLs

@@ -3,13 +3,15 @@ name: odoo-module-development
 description: "Creating or restructuring Odoo modules correctly for the target version: manifest keys and versioning, directory layout, data file order, dependencies, assets, hooks, i18n, and the decision whether a new module is justified at all. Use when scaffolding a module or changing manifests."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Odoo module development
 
 ## Is a new module justified?
 Only after the reuse ladder (instructions/odoo-development.md) says so. Prefer extending an existing custom module that owns the same business area; create a *bridge* module (`<a>_<b>`) when the change couples two independent apps.
 
 ## Scaffold (version-aware)
-`odoo-bin scaffold` exists in every series, but write files explicitly so they match the detected version:
+Use `odoo-master scaffold <name> --model <x.y> --depends a,b [--series S]` (or `/odoo-master:scaffold`): it generates a module that is correct for the series — `<tree>`/`<list>`, attrs vs expressions, `_sql_constraints` vs `models.Constraint`, `ir.model.access.csv` vs `ir.access.csv`, group category vs `res.groups.privilege`, hook signatures, tests with their own data — and validates it. The generated module was install/upgrade/test-verified on official images 16.0–20.0. Layout:
 ```
 <module>/
   __init__.py            # from . import models[, controllers, wizard]

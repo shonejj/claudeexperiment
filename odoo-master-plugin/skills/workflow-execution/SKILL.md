@@ -1,12 +1,16 @@
 ---
 name: workflow-execution
 description: "Drives a workflow execution with the odoo-master engine: start, next, dispatch ready steps (in parallel), complete with statuses, approval gates, repair loops, resume after compaction. Use when running or resuming any odoo-master workflow."
-allowed-tools: "Bash(odoo-master *)"
+allowed-tools:
+  - "Bash(odoo-master *)"
+  - "Bash(${CLAUDE_PLUGIN_ROOT}/bin/odoo-master *)"
 ---
+
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
 
 # Workflow execution
 
-Active executions: !`odoo-master --soft --max-lines 40 workflow executions`
+Active executions: !`${CLAUDE_PLUGIN_ROOT}/bin/odoo-master --soft --max-lines 40 workflow executions`
 
 ## Loop
 ```

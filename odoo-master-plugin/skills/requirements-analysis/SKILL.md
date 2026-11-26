@@ -3,6 +3,8 @@ name: requirements-analysis
 description: "Turning a request, ticket or chat report into testable requirements for Odoo work: goals, user stories, business rules, acceptance criteria, non-functional needs, open questions, actionability verdict, and mapping to Odoo apps/models. Use at the start of feature, ticket or change-request work."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Requirements analysis
 
 Use `${CLAUDE_PLUGIN_ROOT}/templates/requirements/requirements.md`.

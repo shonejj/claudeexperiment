@@ -165,7 +165,9 @@ def status(root: Path) -> dict:
     events = sorted((sd / "events" / "records").glob("*.json")) if (sd / "events" / "records").exists() else []
     return {
         "root": str(root), "odoo_version": ver.get("version"), "confidence": ver.get("confidence"),
-        "modules": (inv.get("summary") or {}).get("module_count"), "analysis_at": inv.get("generated_at"),
+        "modules": (inv.get("summary") or {}).get("module_count") if inv else (read_json(sd / "session" / "bootstrap.json") or {}).get("module_count"),
+        "analysis_at": inv.get("generated_at"),
+        "analysis_hint": None if inv else "full analysis not run yet: `odoo-master analyze --brief`",
         "executions": {"active": [e for e in execs if e["status"] in ("running", "waiting_approval", "blocked", "stalled")],
                        "recent": execs[-10:], "waiting_approval": waiting},
         "mcp": {s: {"provider": e.get("provider"), "status": e.get("status"), "tools": len(e.get("tools", []))} for s, e in (reg.get("servers") or {}).items()},

@@ -3,6 +3,8 @@ name: odoo-database-analysis
 description: "Read-only PostgreSQL analysis of Odoo databases: installed modules, schema vs ORM drift, constraints, indexes, table sizes, locks, slow queries, data integrity checks, and safe remediation planning (backup, validation, rollback). Use for database investigations, migration data impact and performance at the SQL level."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Odoo database analysis
 
 ## Safety first

@@ -3,6 +3,8 @@ name: evidence-generation
 description: "Collecting verifiable evidence for a workflow execution: validation reports, runtime test results, logs summaries, screenshots, review verdicts and commands, hashed into an evidence manifest with achieved and missing verification levels. Use whenever work is verified or before claiming completion."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Evidence generation
 
 - Add items as they are produced:

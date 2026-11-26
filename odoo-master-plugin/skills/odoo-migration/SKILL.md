@@ -3,6 +3,8 @@ name: odoo-migration
 description: "Migrating custom Odoo modules and their data between major versions (16, 17, 18, 19, 20): migration scan, hop-by-hop porting with odoo-bin upgrade_code, upgrade scripts (pre/post/end) with upgrade-util, data validation, neutralized test copies, risk assessment and rollback. Use for any version upgrade or porting task."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Odoo migration
 
 ## 1. Scope
@@ -15,12 +17,14 @@ description: "Migrating custom Odoo modules and their data between major version
 ## 3. Port per hop (never skip)
 ```
 git switch -c migrate/<hop>
-docker run --rm -v $PWD/addons:/mnt/extra-addons odoo:<hop> odoo upgrade_code --addons-path /mnt/extra-addons --from <prev> --to <hop> --dry-run
-# review list → run without --dry-run on the branch → review the diff file by file
+odoo-master source upgrade-code <addons_dir> --from <prev> --to <hop>            # dry run: files that would change
+odoo-master source upgrade-code <addons_dir> --from <prev> --to <hop> --apply    # clean tree required; then review git diff
 odoo-master migration scan --from <prev> --to <hop>      # remaining findings
 odoo-master validate --series <hop> --brief
 ```
 (`upgrade_code` ships in 18.0+ images; for 16→17 apply the rule list manually.)
+
+**Automated rewrites are partial.** Verified live on a 17→18→19 chain: `upgrade_code` converted `<tree>`→`<list>` and `_sql_constraints`→`models.Constraint`, but left `groups_id` in tests and `category_id` on `res.groups` (a hard install error on 19.0). Always re-run the scan and `validate --series <hop>` after applying, then fix the remainder by hand, bump the manifest version, and runtime-test.
 
 ## 4. Data: upgrade scripts
 ```

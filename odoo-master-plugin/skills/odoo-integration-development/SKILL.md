@@ -3,6 +3,8 @@ name: odoo-integration-development
 description: "Integrating Odoo with external systems: Odoo external APIs (XML-RPC/JSON-RPC, JSON-2 API keys), outbound REST calls from Odoo modules, inbound webhooks, sync jobs with crons/queues, idempotency, retries and credential handling. Use when building connectors or APIs around Odoo."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Odoo integration development
 
 ## Inbound (external → Odoo)

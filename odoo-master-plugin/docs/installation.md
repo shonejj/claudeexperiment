@@ -10,6 +10,8 @@
 | Node ≥ 18 + Playwright (Chromium) | visual QA, best PDF rendering | optional — PDF falls back to Chrome CLI, then ReportLab |
 | `psql` client | read-only database inspection | optional |
 | pypdf | PDF page-count verification | optional |
+| `pyright-langserver` (`npm i -g pyright`) | Python diagnostics via the plugin's `.lsp.json` | optional |
+| bubblewrap + socat | running `claude plugin eval` (sandboxed shell) | only for evals |
 
 ## Install from this repository's marketplace
 Inside Claude Code:
@@ -27,6 +29,14 @@ Local development without installing: `claude --plugin-dir /path/to/claudeexperi
 Then set plugin options (autonomy, production patterns, fallback version):
 ```
 claude plugin configure odoo-master
+```
+
+## Project setup
+```
+/odoo-master:init                 # .odoo-master/config.yaml
+/odoo-master:init --events        # + webhook routes
+/odoo-master:init --settings      # + recommended permissions merged into .claude/settings.json (backup first)
+/odoo-master:doctor               # what works in this environment
 ```
 
 ## Verify

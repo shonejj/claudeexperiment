@@ -155,12 +155,13 @@ def test_commands_frontmatter_and_no_skill_collision():
         d = _fm(c)
         assert d["description"] and d["disable-model-invocation"] is True
         assert all(t.startswith("Bash(") for t in d["allowed-tools"])
+        assert "Bash(${CLAUDE_PLUGIN_ROOT}/bin/odoo-master *)" in d["allowed-tools"]
         assert c.stem not in skills
         body = c.read_text()
         assert ":-" not in body, "shell-style defaults are not a Claude Code substitution"
         for inj in [ln for ln in body.splitlines() if "!`" in ln]:
             cmd = inj.split("!`", 1)[1].split("`", 1)[0]
-            assert cmd.startswith("odoo-master --soft") and not any(op in cmd for op in ("|", "&&", "||", ";", ">")), c.name
+            assert cmd.startswith("${CLAUDE_PLUGIN_ROOT}/bin/odoo-master --soft") and not any(op in cmd for op in ("|", "&&", "||", ";", ">")), c.name
 
 
 def test_skill_injections_are_single_commands():
@@ -168,8 +169,8 @@ def test_skill_injections_are_single_commands():
         for ln in s.read_text().splitlines():
             if "!`" in ln:
                 cmd = ln.split("!`", 1)[1].split("`", 1)[0]
-                assert cmd.startswith("odoo-master --soft") and not any(op in cmd for op in ("|", "&&", "||", ";", ">")), s
-                assert "Bash(odoo-master *)" in s.read_text().split("---")[1]
+                assert cmd.startswith("${CLAUDE_PLUGIN_ROOT}/bin/odoo-master --soft") and not any(op in cmd for op in ("|", "&&", "||", ";", ">")), s
+                assert "Bash(${CLAUDE_PLUGIN_ROOT}/bin/odoo-master *)" in s.read_text().split("---")[1]
 
 
 def test_output_style_monitor_lsp_manifest():
@@ -264,3 +265,18 @@ def test_linear_webhook(tmp_path, monkeypatch):
     sig = hmac.new(b"ln", body, hashlib.sha256).hexdigest()
     r = handle_event("linear", {"Linear-Signature": sig}, body, tmp_path)
     assert r["status"] == 200 and r["results"][0]["status"] == "no_route"   # no Linear route enabled by default
+
+
+def test_version_conflict_guard_and_confirm(fx):
+    root = fx("broken_module")
+    run_hook("session-start", {"cwd": str(root), "session_id": "c1", "source": "startup"})
+    f = str(root / "addons/broken_mod/models/things.py")
+    rc, out = run_hook("guard", {"cwd": str(root), "tool_name": "Edit", "tool_input": {"file_path": f, "new_string": "x"}})
+    assert out["hookSpecificOutput"]["permissionDecision"] == "ask" and "--confirm" in out["hookSpecificOutput"]["permissionDecisionReason"]
+    rc, res, _ = cli("detect-version", "--confirm", "18.0", root=root)
+    assert res["confirmed"] == "18.0" and res["resolved_conflicts"]
+    assert run_hook("guard", {"cwd": str(root), "tool_name": "Edit", "tool_input": {"file_path": f, "new_string": "x"}})[1] == ""
+    rc, b, _ = cli("detect-version", "--brief", root=root)
+    assert "18.0 (confidence confirmed" in b
+    rc, _, err = cli("detect-version", "--confirm", "13.5", root=root)
+    assert rc == 2

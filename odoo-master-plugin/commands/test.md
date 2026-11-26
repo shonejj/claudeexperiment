@@ -3,9 +3,12 @@ description: "Install and upgrade modules in a disposable Odoo + PostgreSQL (Doc
 argument-hint: "<module[,module2]> [--series 18.0]"
 allowed-tools:
   - "Bash(odoo-master *)"
+  - "Bash(${CLAUDE_PLUGIN_ROOT}/bin/odoo-master *)"
   - "Bash(docker *)"
 disable-model-invocation: true
 ---
+
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
 
 Run `odoo-master runtime test --modules $ARGUMENTS` (add `--series` if the user gave one; Docker required — check with `odoo-master runtime check`).
 Report per pass (install, upgrade): status, tests run, failures, the first traceback (use `odoo-master logs summarize <log>`).

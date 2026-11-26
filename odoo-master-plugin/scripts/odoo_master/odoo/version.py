@@ -132,7 +132,7 @@ def detect(root: Path | str, extra_paths: list[Path] | None = None, max_files: i
                          "max_exclusive": ".".join(map(str, upper)) if upper else None}
     verdict["signals"] = signals
     verdict["files_scanned"] = min(count, max_files)
-    return verdict
+    return _apply_confirmation(root, verdict)
 
 
 def _in_bounds(v: str, lower, upper) -> bool:
@@ -177,6 +177,41 @@ def _decide(signals: list[dict], lower, upper) -> dict:
         confidence = "medium"
     return {"version": version, "confidence": confidence,
             "candidates": [v for v, _ in score.most_common()], "conflicts": conflicts}
+
+
+def confirm(root: Path | str, series: str) -> dict:
+    """Record a user-confirmed target series in .odoo-master/config.yaml (key confirmed_odoo_version) and
+    refresh odoo-version.json. Detection keeps reporting the signals; conflicts move to resolved_conflicts."""
+    from . import known_series
+    from ..util import state_dir, write_json, load_yaml, dump_yaml
+    if not re.match(r"^\d+\.0$", series):
+        raise ValueError("series must look like 18.0")
+    if series not in known_series():
+        raise ValueError(f"unknown series {series}; known: {', '.join(known_series())}")
+    root = Path(root)
+    cfg_path = state_dir(root) / "config.yaml"
+    cfg = (load_yaml(cfg_path) or {}) if cfg_path.exists() else {}
+    cfg["confirmed_odoo_version"] = series
+    cfg_path.write_text(dump_yaml(cfg), encoding="utf-8")
+    res = detect(root)
+    write_json(state_dir(root) / "odoo-version.json", res)
+    return {"confirmed": series, "config": str(cfg_path), "detected": res.get("detected_version"), "resolved_conflicts": res.get("resolved_conflicts")}
+
+
+def _apply_confirmation(root: Path, verdict: dict) -> dict:
+    from ..util import STATE_DIR_NAME, load_yaml
+    p = root / STATE_DIR_NAME / "config.yaml"
+    try:
+        confirmed = (load_yaml(p) or {}).get("confirmed_odoo_version") if p.exists() else None
+    except Exception:
+        confirmed = None
+    if confirmed:
+        verdict["detected_version"] = verdict.get("version")
+        verdict["version"] = confirmed
+        verdict["confidence"] = "confirmed"
+        verdict["resolved_conflicts"] = verdict.get("conflicts") or []
+        verdict["conflicts"] = []
+    return verdict
 
 
 def brief(result: dict) -> str:

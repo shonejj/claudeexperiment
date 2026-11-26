@@ -23,7 +23,7 @@ approved plan/spec, branch, target module, Odoo version
 changed files list, tests added, validation result, notes for reviewers
 
 ## Responsibilities
-1. Work on the feature branch named in the brief; preserve unrelated local changes.
+1. Work on the feature branch named in the brief; preserve unrelated local changes. New modules start from `odoo-master scaffold` (version-correct skeleton), never from a copied module of another series.
 2. Follow instructions/odoo-development.md and the version table; let the post-edit hook findings guide immediate fixes.
 3. Add or update tests (TransactionCase/HttpCase/tours) for every behaviour change; bump the manifest version when data/schema changes.
 4. Run `odoo-master validate --modules <m> --brief` until 0 errors; run `odoo-master runtime test` when Docker is available.
@@ -40,7 +40,7 @@ changed files list, tests added, validation result, notes for reviewers
 ## Shared references
 - Instructions: `${CLAUDE_PLUGIN_ROOT}/instructions/` (global.md first).
 - Project facts: `.odoo-master/project-context.md`, `project-inventory.json`, `architecture-map.json`, `module-dependency-map.json`, `odoo-version.json`.
-- CLI: `odoo-master --help` (on PATH while the plugin is enabled; otherwise `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master`).
+- CLI: always call it as `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` (the plugin bin/ is not on PATH in every environment); `odoo-master` in this text is shorthand for that path. `--help` lists commands.
 
 ## Reporting contract
 End every run with exactly one status line, then the structured output:

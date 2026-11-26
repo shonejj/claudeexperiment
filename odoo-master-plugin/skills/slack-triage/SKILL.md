@@ -3,6 +3,8 @@ name: slack-triage
 description: "Handling Odoo issues reported in Slack (or other chat) through MCP: read the message and thread, extract the issue, search for duplicate tickets, investigate the code, create or update a ticket when authorised, and reply in the original thread without leaking private data. Use for Slack permalinks or chat-reported problems."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Slack triage
 
 1. Resolve `chat.read_thread`, `chat.search`, `chat.reply_thread` (`odoo-master mcp resolve ...`).

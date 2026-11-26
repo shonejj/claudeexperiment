@@ -1,12 +1,16 @@
 ---
 name: mcp-integration
 description: "Universal MCP integration: discover configured MCP servers and their tools (schemas, read/write classification), map tools to capabilities (ticket.*, repo.*, chat.*, docs.*, db.*, browser.*), register them, select tools dynamically for workflows, and handle auth problems, disconnections and missing capabilities. Use when connecting a new MCP server, when a workflow needs an external capability, or when an integration fails."
-allowed-tools: "Bash(odoo-master *)"
+allowed-tools:
+  - "Bash(odoo-master *)"
+  - "Bash(${CLAUDE_PLUGIN_ROOT}/bin/odoo-master *)"
 ---
+
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
 
 # MCP integration
 
-Configured servers (from .mcp.json / settings, no secrets): !`odoo-master --soft --max-lines 40 mcp servers`
+Configured servers (from .mcp.json / settings, no secrets): !`${CLAUDE_PLUGIN_ROOT}/bin/odoo-master --soft --max-lines 40 mcp servers`
 
 ## Discovery (runtime, not hard-coded)
 1. **Session view** (authoritative for what you can call now): list the MCP tools available to you (names `mcp__<server>__<tool>`; use ToolSearch / tool listing). For each server collect name, description and input schema.

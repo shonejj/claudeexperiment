@@ -70,3 +70,14 @@ def test_js_syntax_check(fx):
     js.write_text("export function x( {\n")
     res = validate(root, series="18.0", with_js=True)
     assert "js-syntax" in rules(res)
+
+
+def test_attrs_via_attribute_element_detected(fx):
+    root = fx("odoo18_project")
+    v = root / "addons/stock_quality_check/views/legacy.xml"
+    v.write_text('<odoo><record id="lv" model="ir.ui.view"><field name="model">stock.quality.check</field>'
+                 '<field name="inherit_id" ref="stock_quality_check.stock_quality_check_view_form"/><field name="arch" type="xml">'
+                 '<field name="note" position="attributes"><attribute name="attrs">{\'invisible\': True}</attribute></field>'
+                 '</field></record></odoo>')
+    res = validate(root, series="18.0", with_js=False)
+    assert any(f["rule"] == "attrs-states-removed" and f["file"].endswith("legacy.xml") for f in res["findings"])

@@ -37,7 +37,10 @@ def cmd_analyze(a):
 
 
 def cmd_detect_version(a):
-    from .odoo.version import detect, brief
+    from .odoo.version import detect, brief, confirm
+    if a.confirm:
+        emit(confirm(_root(a), a.confirm))
+        return 0
     res = detect(_root(a))
     if a.brief:
         print(brief(res))
@@ -384,7 +387,9 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--brief", action="store_true"); s.add_argument("--no-write", action="store_true")
     s.add_argument("--include-core", action="store_true"); s.set_defaults(fn=cmd_analyze)
 
-    s = sub.add_parser("detect-version"); s.add_argument("--brief", action="store_true"); s.set_defaults(fn=cmd_detect_version)
+    s = sub.add_parser("detect-version"); s.add_argument("--brief", action="store_true")
+    s.add_argument("--confirm", metavar="SERIES", help="record the target series confirmed by the user (resolves conflicts)")
+    s.set_defaults(fn=cmd_detect_version)
     s = sub.add_parser("inventory"); s.add_argument("--summary", action="store_true"); s.add_argument("--include-core", action="store_true")
     s.set_defaults(fn=cmd_inventory)
 
@@ -482,7 +487,7 @@ def main(argv=None) -> int:
     if not (args.soft or args.max_lines):
         try:
             return args.fn(args) or 0
-        except (ValueError, FileNotFoundError, KeyError) as exc:
+        except (ValueError, KeyError, OSError) as exc:   # OSError covers FileNotFoundError and read-only filesystems
             print(json.dumps({"error": type(exc).__name__, "message": str(exc)}), file=sys.stderr)
             return 2
     import contextlib

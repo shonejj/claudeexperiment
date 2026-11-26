@@ -3,6 +3,8 @@ name: odoo-deployment
 description: "Preparing Odoo deployments: Docker/compose and official image conventions, odoo.conf review (workers, limits, proxy_mode, gevent port, dbfilter, list_db, admin_passwd), reverse proxy with websocket routing, Odoo.sh, module upgrade lists, backups and rollback runbooks. Use for deploy preparation and environment setup."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Odoo deployment
 
 - Official image `odoo:<series>`: env `HOST`, `PORT`, `USER`, `PASSWORD` (or `PASSWORD_FILE`); volumes `/var/lib/odoo` (filestore, must match `data_dir`), `/etc/odoo/odoo.conf`, `/mnt/extra-addons`; CLI args after the command (`odoo --db-filter=...`).

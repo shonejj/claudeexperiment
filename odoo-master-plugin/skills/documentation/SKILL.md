@@ -3,6 +3,8 @@ name: documentation
 description: "Producing project documents from templates: requirements, functional/technical specs, implementation plans, migration plans, development reports, runbooks, release notes, with frontmatter metadata and Markdown→HTML/PDF rendering through odoo-master report. Use for any written deliverable."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Documentation
 
 - Templates: `${CLAUDE_PLUGIN_ROOT}/templates/` (requirements, architecture, wireframes, estimates, jira-comments, reports, migration-plans, testing).

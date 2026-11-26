@@ -89,14 +89,16 @@ def upgrade_code(addons: str, source: str, target: str, dry_run: bool = True, im
     if not path.is_dir():
         raise FileNotFoundError(addons)
     mode = "ro" if dry_run else "rw"
-    args = ["odoo", "upgrade_code", "--addons-path", "/mnt/upgrade"]
+    # bypass the image entrypoint: it waits for a database, which upgrade_code does not need
+    args = ["upgrade_code", "--addons-path", "/mnt/upgrade"]
     args += ["--script", script] if script else ["--from", source, "--to", target]
     if dry_run:
         args.append("--dry-run")
     # run as the host user so rewritten files keep their ownership
     import os
     user = ["--user", f"{os.getuid()}:{os.getgid()}"] if hasattr(os, "getuid") else []
-    r = subprocess.run(["docker", "run", "--rm", *user, "-v", f"{path}:/mnt/upgrade:{mode}", _image(target, image), *args],
+    r = subprocess.run(["docker", "run", "--rm", *user, "--entrypoint", "/usr/bin/odoo", "-v", f"{path}:/mnt/upgrade:{mode}",
+                        _image(target, image), *args],
                        capture_output=True, text=True, timeout=1800)
     out = (r.stdout + r.stderr).strip()
     files = sorted({m.group(1) for m in re.finditer(r"(/mnt/upgrade/[^\s:]+)", out)})

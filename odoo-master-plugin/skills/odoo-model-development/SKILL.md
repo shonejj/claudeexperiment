@@ -3,6 +3,7 @@ name: odoo-model-development
 description: "Odoo ORM modelling: new models, extending standard models, fields and parameters, computed/related/stored fields, constraints and indexes per version, onchange, CRUD overrides with super(), multi-company, mail.thread/activity mixins, and batching. Use when adding or changing Python models."
 ---
 
+
 # Odoo model development
 
 ## Patterns

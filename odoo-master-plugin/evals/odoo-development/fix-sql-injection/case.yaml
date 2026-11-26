@@ -17,5 +17,9 @@ graders:
     input_match: "odoo-master.*validate"
   - name: parameterised
     type: llm
-    criteria: "things.py no longer formats SQL with % or f-strings (uses cr.execute(query, params) or odoo.tools.SQL or the ORM) and no longer calls eval on user input; the explanation names SQL injection as the root cause."
+    criteria: "In do_it, the SQL query no longer interpolates the term with % or f-strings: it uses cr.execute(query, params), odoo.tools.SQL or the ORM. The builtin eval() is no longer applied to the term (ast.literal_eval or removing the evaluation are both acceptable)."
     focus: {source: file, path: addons/broken_mod/models/things.py}
+  - name: names-root-cause
+    type: regex
+    pattern: "injection|parameteri[sz]"
+    flags: "i"

@@ -1,12 +1,16 @@
 ---
 name: odoo-version-detection
 description: "Determines the Odoo series (16.0-20.0+) of a project from multiple signals (odoo/release.py, Docker images, requirements, manifests, syntax fingerprints) with confidence and conflict reporting, and loads the matching version rules. Use before writing or reviewing any Odoo code, and whenever versions are ambiguous."
-allowed-tools: "Bash(odoo-master *)"
+allowed-tools:
+  - "Bash(odoo-master *)"
+  - "Bash(${CLAUDE_PLUGIN_ROOT}/bin/odoo-master *)"
 ---
+
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
 
 # Odoo version detection
 
-Result now: !`odoo-master --soft detect-version --brief`
+Result now: !`${CLAUDE_PLUGIN_ROOT}/bin/odoo-master --soft detect-version --brief`
 
 - Full evidence: `odoo-master detect-version` (signals with weights and file:line, fingerprint bounds, conflicts).
 - Priority: `odoo/release.py` (100) > Docker image tag (80) > requirements/odoo-version file (60) > manifest majority (40) > syntax fingerprints (bounds only).

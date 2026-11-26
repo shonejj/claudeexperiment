@@ -3,6 +3,8 @@ name: wireframing
 description: "Lightweight wireframes for Odoo screens and flows (Mermaid flows, ASCII form layouts, or an HTML mock) that map directly to view XML anchors. Use when a feature adds or reshapes UI and the layout needs agreement before coding."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Wireframing
 
 - Flow: Mermaid `flowchart` or `sequenceDiagram` of the user journey (menu → list → form → action).

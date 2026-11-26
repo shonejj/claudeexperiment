@@ -3,6 +3,8 @@ name: visual-qa
 description: "Browser verification of Odoo UI changes with Playwright against an ephemeral test instance: login with generated test credentials, open menus/records, capture screenshots at multiple widths, collect console errors and failed network requests, and record evidence. Use when views, templates or JS change."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Visual QA
 
 1. Instance: `odoo-master runtime serve --modules <m> [--series S] --port 8069` → prints URL and a credentials file for the throwaway database (`.odoo-master/session/runtime-<id>.json`, git-ignored). Never use real user accounts or production URLs.

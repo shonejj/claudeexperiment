@@ -4,7 +4,7 @@
 1. Plugin defaults: `config/defaults.yaml`, plus policies in `policies/*.yaml` (exposed as `config.policies.<name>`)
 2. Organisation file: path in `ODOO_MASTER_ORG_CONFIG`
 3. Project file: `.odoo-master/config.yaml` (schema `schemas/config.schema.json`)
-4. Plugin options (`claude plugin configure odoo-master`): `autonomy`, `production_patterns`, `default_odoo_version`, exported to hooks as `CLAUDE_PLUGIN_OPTION_*`
+4. Plugin options (`claude plugin configure odoo-master`): `autonomy`, `production_patterns`, `default_odoo_version`, `enterprise_path`, `postgres_image`, `ticket_approval_label`, `report_formats`. They are exported to hooks as `CLAUDE_PLUGIN_OPTION_*`, and the SessionStart hook persists them to `.odoo-master/session/plugin-options.json` so the CLI sees them too.
 5. Environment: `ODOO_MASTER_AUTONOMY`, `ODOO_MASTER_PRODUCTION_PATTERNS`, `ODOO_MASTER_DEFAULT_ODOO_VERSION`
 
 Inspect the merged result with `odoo-master config`.
@@ -19,6 +19,12 @@ plugin's config shapes agent behaviour and guard-rails only.
 | `autonomy` | `checkpoint` | `checkpoint`: every approval gate waits for a human. `autonomous`: low-risk gates auto-approve (policy) |
 | `production_patterns` | `[prod, production, live]` | regexes; matching database names/hosts are treated as production |
 | `default_odoo_version` | `""` | used only when detection finds nothing |
+| `confirmed_odoo_version` | — | written by `odoo-master detect-version --confirm <series>` (or the prompt hook); resolves conflicting signals |
+| `policies.testing.quality_gate.require_validation_run` | `true` | once per session, ask for a validation run when Odoo files changed without one |
+| `enterprise_path` (option) / `runtime.enterprise_path` | `""` | Enterprise addons mounted read-only in runtime tests |
+| `postgres_image` (option) / `runtime.postgres_image` | `postgres:16` | database image for runtime tests |
+| `ticket_approval_label` (option) / `policies.approvals.ticket_approval.label` | `odoo-master:approved` | ticket approval signal |
+| `report_formats` (option) / `reports.formats` | `html,pdf` | rendered formats |
 | `agents.disabled` / `agents.optional_enabled` | `[]` | agent selection hints for the orchestrator |
 | `workflows.default_for_intent` | see defaults | intent → workflow mapping |
 | `runtime.image` / `postgres_image` / `enterprise_path` / `addons_paths` | auto | runtime test environment |

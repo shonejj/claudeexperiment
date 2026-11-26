@@ -3,6 +3,8 @@ name: pull-request-review
 description: "Reviewing an existing pull request end to end: fetch diff, files and CI status, check out the head in an isolated worktree, run Odoo validation on changed files, apply the two-verdict review, and post (after approval) a structured review. Use when asked to review a PR or on PR events."
 ---
 
+> CLI: `${CLAUDE_PLUGIN_ROOT}/bin/odoo-master` — use this absolute path (the plugin's `bin/` is not on PATH in every environment); `odoo-master` below is shorthand for it.
+
 # Pull request review
 
 1. Fetch PR metadata, changed files, diff and checks (capability `repo.read_pull_request`, `repo.inspect_checks`).
